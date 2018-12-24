@@ -1,0 +1,36 @@
+<resources>
+    <string name="app_name">三創三趣</string>
+    <string name="google_maps_key" templateMergeStrategy="preserve" translatable="false">AIzaSyC5R4Lvngu6XG68v8HuNxxq8Zn0wGLZV4U</string>
+
+    <string name="activity_main_title_store">逛店趣</string>
+    <string name="activity_main_title_guide">直達趣</string>
+    <string name="activity_main_title_facility">暖心趣</string>
+    <string name="map_page_start_navi">導 航</string>
+    <string name="map_page_stop_navi">結 束</string>
+    <string name="map_page_instructions_current_floor">所在樓層</string>
+    <string name="map_page_instructions_destination">導引目的地</string>
+    <string name="map_page_instructions_user_location">重新定位</string>
+    <string name="map_page_instructions_floor_select">選擇樓層</string>
+    <string name="map_page_instructions_help">操作教學</string>
+    <string name="map_page_instructions_indoor_location">室內模式</string>
+    <string name="map_page_instructions_outdoor_location">室外模式</string>
+    <string name="dialog_title_hint">提示</string>
+    <string name="dialog_button_ok_text">好</string>
+    <string name="dialog_button_no_text">否</string>
+    <string name="error_dialog_title_text_no_network">無連接網路</string>
+    <string name="error_dialog_message_text_no_network">請檢查網路連線</string>
+    <string name="error_dialog_title_text_unknown">發生未預期錯誤</string>
+    <string name="error_dialog_title_text_json_parse_error">發生未預期的錯誤</string>
+    <string name="dialog_message_network_connect_not_good">此處無可供服務流量之網路，請移動至適當區域，檢查連線狀況後再試。</string>
+    <string name="error_dialog_title_text_normal">請注意</string>
+    <string name="dialog_message_route_empty">取得路徑錯誤，請洽系統資訊科。</string>
+    <string name="dialog_message_arrive_destination">您已抵達終點</string>
+    <string name="drawer_content_pager_title_store">店家</string>
+    <string name="drawer_content_pager_title_restaurant">餐廳</string>
+    <string name="drawer_content_pager_title_theater">劇場</string>
+    <string name="drawer_content_pager_title_facility">服務設施</string>
+    <string name="drawer_content_pager_error_msg_no_data">無 POI 資訊</string>
+    <string name="action_bar_text_back">上一頁</string>
+    <string name="search">搜尋</string>
+
+</resources>

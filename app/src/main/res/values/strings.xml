@@ -1,0 +1,21 @@
+<resources>
+    <string name="app_name">三創三趣</string>
+    <string name="activity_main_title_store">逛店趣</string>
+    <string name="activity_main_title_guide">直達趣</string>
+    <string name="activity_main_title_facility">暖心趣</string>
+    <string name="fragment_guide_four_cate">四類別</string>
+    <string name="fragment_guide_go_shopping">逛街去</string>
+    <string name="fragment_guide_shopping_self">自逛</string>
+    <string name="fragment_guide_edit_hint">輸入單一類別</string>
+    <string name="fragment_guide_cate">類別</string>
+    <string name="fragment_guide_cate_store">店家</string>
+    <string name="fragment_guide_cate_restaurant">餐廳</string>
+    <string name="fragment_guide_cate_theater">劇場</string>
+    <string name="fragment_guide_cate_facility">服務設施</string>
+    <string name="fragment_facility_cate">各類別</string>
+    <string name="fragment_facility_edit_hint">輸入單服務設施類別</string>
+    <string name="fragment_facility_go_navi">快快趣</string>
+    <string name="fragment_store_custom">自訂</string>
+    <string name="fragment_store_recommend">推薦</string>
+    <string name="fragment_store_edit_hint">輸入id，以逗點區隔</string>
+</resources>

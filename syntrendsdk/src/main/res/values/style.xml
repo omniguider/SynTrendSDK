@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="STSDKTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">#000000</item>
+        <item name="colorPrimaryDark">#000000</item>
+        <item name="colorAccent">#25afc1</item>
+    </style>
+
+    <style name="ClusterViewTextAppearanceBig" parent="android:TextAppearance">
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:textSize">16sp</item>
+    </style>
+
+    <style name="ClusterViewTextAppearanceMedium" parent="android:TextAppearance">
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:textSize">12sp</item>
+    </style>
+
+    <style name="RoundedCornerButton" parent="Widget.AppCompat.Button.Colored">
+        <item name="android:background">@drawable/ic_btn_gallery_info</item>
+    </style>
+
+    <style name="SearchListItemStyle">
+        <item name="android:paddingLeft">@dimen/list_item_padding_left</item>
+        <item name="android:paddingTop">@dimen/list_item_padding_top</item>
+        <item name="android:paddingRight">@dimen/list_item_padding_right</item>
+    </style>
+
+</resources>

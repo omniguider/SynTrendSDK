@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity_main_fl"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/gray_3d"
+    android:gravity="center"
+    tools:context=".MainActivity">
+
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/map_content_view_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@android:color/black"
+        app:layout_scrollFlags="enterAlways|scroll">
+
+        <TextView
+            android:id="@+id/map_content_view_tv_action_bar_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="@string/app_name"
+            android:textColor="@android:color/white"
+            android:textSize="@dimen/text_size_action_bar"
+            android:textStyle="bold" />
+
+    </android.support.v7.widget.Toolbar>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/activity_main_store_tv"
+            android:layout_width="240dp"
+            android:layout_height="60dp"
+            android:layout_gravity="center"
+            android:background="@drawable/solid_round_rectangle_black"
+            android:gravity="center"
+            android:text="@string/activity_main_title_store"
+            android:textColor="@android:color/white"
+            android:textSize="28sp" />
+
+        <TextView
+            android:id="@+id/activity_main_guide_tv"
+            android:layout_width="240dp"
+            android:layout_height="60dp"
+            android:layout_gravity="center"
+            android:layout_marginTop="60dp"
+            android:background="@drawable/solid_round_rectangle_black"
+            android:gravity="center"
+            android:text="@string/activity_main_title_guide"
+            android:textColor="@android:color/white"
+            android:textSize="28sp" />
+
+        <TextView
+            android:id="@+id/activity_main_facility_tv"
+            android:layout_width="240dp"
+            android:layout_height="60dp"
+            android:layout_gravity="center"
+            android:layout_marginTop="60dp"
+            android:background="@drawable/solid_round_rectangle_black"
+            android:gravity="center"
+            android:text="@string/activity_main_title_facility"
+            android:textColor="@android:color/white"
+            android:textSize="28sp" />
+    </LinearLayout>
+</FrameLayout>

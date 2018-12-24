@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/solid_top_round_rectangle_olive_green"
+    android:paddingBottom="10dp"
+    android:paddingLeft="@dimen/default_padding"
+    android:paddingRight="@dimen/default_padding"
+    android:paddingTop="10dp">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <RelativeLayout
+            android:id="@+id/navigation_info_view_rl_btns"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true">
+
+            <TextView
+                android:id="@+id/navigation_info_view_tv_leave_navi"
+                android:layout_width="70dp"
+                android:layout_height="36dp"
+                android:background="@mipmap/rectangle_copy_7"
+                android:gravity="center"
+                android:text="@string/map_page_stop_navi"
+                android:textColor="@color/red_91"
+                android:textSize="@dimen/text_size_big"
+                android:textStyle="bold" />
+
+        </RelativeLayout>
+
+        <LinearLayout
+            android:id="@+id/navigation_info_view_ll"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_alignParentStart="true"
+            android:layout_toLeftOf="@id/navigation_info_view_rl_btns"
+            android:orientation="horizontal">
+
+            <com.omni.syntrendsdk.view.CircleNetworkImageView
+                android:id="@+id/navigation_info_view_cniv"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_gravity="center_vertical"
+                android:layout_marginRight="8dp"
+                android:src="@mipmap/nlpi_logo" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginRight="10dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/navigation_info_view_tv_title"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:gravity="center_vertical"
+                        android:textColor="@android:color/white"
+                        android:textSize="@dimen/text_size_big"
+                        tools:text="內湖清香農場" />
+
+                </LinearLayout>
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </RelativeLayout>
+
+</RelativeLayout>
