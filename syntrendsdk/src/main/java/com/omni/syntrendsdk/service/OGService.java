@@ -11,6 +11,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.text.TextUtils;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -153,8 +154,8 @@ public class OGService implements IARegion.Listener,
 
     private void initLocationService() {
         if (mIALocationManager == null) {
-            Log.e("OKOK", "mIALocationManager");
             mIALocationManager = IALocationManager.create(mActivity);
+            mIALocationManager.lockIndoors(true);
         } else {
             mIALocationManager.unregisterRegionListener(this);
         }
@@ -165,7 +166,6 @@ public class OGService implements IARegion.Listener,
     }
 
     public void stopService() {
-        Log.e("OKOK","stopService");
         if (mIALocationManager != null) {
             mIALocationManager.removeLocationUpdates(this);
             mIALocationManager.unregisterRegionListener(this);
@@ -190,7 +190,6 @@ public class OGService implements IARegion.Listener,
         }
         if (mIALocationManager != null) {
             mIALocationManager.destroy();
-            Log.e("OKOK", "mIALocationManager.destroy()");
             mIALocationManager = null;
         }
     }
@@ -262,7 +261,7 @@ public class OGService implements IARegion.Listener,
     @Override
     public void onLocationChanged(IALocation iaLocation) {
 //        Log.e("@W@", "floor certainty : " + iaLocation.getFloorCertainty() + ", accuracy : " + iaLocation.getAccuracy());
-        mTraceIdRecordList.add(new String[]{mIALocationManager.getExtraInfo().traceId});
+//        mTraceIdRecordList.add(new String[]{mIALocationManager.getExtraInfo().traceId});
 
         if (iaLocation != null && iaLocation.getFloorCertainty() > 0.8) {
 

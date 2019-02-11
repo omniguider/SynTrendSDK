@@ -95,9 +95,9 @@ public class Tools {
 
     public int getNotificationSmallIcon() {
         if (getAndroidVersion() >= Build.VERSION_CODES.LOLLIPOP) {
-            return R.mipmap.nlpi_logo;
+            return R.mipmap.syn_poi_information;
         } else {
-            return R.mipmap.nlpi_logo;
+            return R.mipmap.syn_poi_information;
         }
     }
 

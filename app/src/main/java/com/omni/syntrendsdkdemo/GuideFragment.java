@@ -50,7 +50,6 @@ public class GuideFragment extends Fragment {
             public void onClick(View v) {
                 category = CATEGORY_ALL;
                 Intent intent = new Intent(getActivity(), SynTrendSDKActivity.class);
-                intent.putExtra(MainActivity.ARG_KEY_TYPE, TYPE_GUIDE);
                 intent.putExtra(ARG_KEY_GUIDE_CATEGORY, category);
                 startActivity(intent);
             }
@@ -73,7 +72,6 @@ public class GuideFragment extends Fragment {
                 }
 
                 Intent intent = new Intent(getActivity(), SynTrendSDKActivity.class);
-                intent.putExtra(MainActivity.ARG_KEY_TYPE, TYPE_GUIDE);
                 intent.putExtra(ARG_KEY_GUIDE_CATEGORY, category);
                 startActivity(intent);
             }

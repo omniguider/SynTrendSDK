@@ -38,7 +38,8 @@
                 android:layout_width="@dimen/action_bar_btn_width"
                 android:layout_height="match_parent"
                 android:layout_gravity="right"
-                android:layout_marginEnd="5dp">
+                android:layout_marginEnd="5dp"
+                android:visibility="gone">
 
                 <ImageView
                     android:id="@+id/map_content_view_iv_action_bar_menu"
@@ -211,8 +212,8 @@
         android:layout_height="46dp"
         android:layout_alignParentBottom="true"
         android:layout_alignParentEnd="true"
-        android:layout_marginEnd="12dp"
         android:layout_marginBottom="100dp"
+        android:layout_marginEnd="12dp"
         android:background="@mipmap/button_location_w" />
 
     <ImageView
@@ -301,7 +302,7 @@
         android:layout_marginTop="100dp"
         android:background="@drawable/stroke_circle_gray_e4"
         android:padding="5dp"
-        android:src="@mipmap/nlpi_logo"
+        android:src="@mipmap/syn_poi_information"
         android:visibility="gone" />
 
     <LinearLayout

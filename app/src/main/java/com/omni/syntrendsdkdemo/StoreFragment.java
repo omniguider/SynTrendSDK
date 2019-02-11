@@ -19,7 +19,6 @@ import com.omni.syntrendsdk.tool.PreferencesTools;
 public class StoreFragment extends Fragment {
 
     public static final String TAG = "fragment_tag_store";
-    private static final String TYPE_STORE = "type_store";
     private static final String ARG_KEY_STORE_ROUTE_A = "arg_key_store_route_a";
     private static final String ARG_KEY_STORE_ROUTE_B = "arg_key_store_route_b";
 
@@ -51,11 +50,22 @@ public class StoreFragment extends Fragment {
                 String custom = editTextCustom.getText().toString();
                 String recommend = editTextRecommend.getText().toString();
 
-                Intent intent = new Intent(getActivity(), SynTrendSDKActivity.class);
-                intent.putExtra(MainActivity.ARG_KEY_TYPE, TYPE_STORE);
-                intent.putExtra(ARG_KEY_STORE_ROUTE_A, custom);
-                intent.putExtra(ARG_KEY_STORE_ROUTE_B, recommend);
-                startActivity(intent);
+                if (custom.length() != 0 || recommend.length() != 0) {
+                    Intent intent = new Intent(getActivity(), SynTrendSDKActivity.class);
+                    intent.putExtra(ARG_KEY_STORE_ROUTE_A, custom);
+                    intent.putExtra(ARG_KEY_STORE_ROUTE_B, recommend);
+                    startActivity(intent);
+                } else {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(getActivity())
+                            .setTitle("提示")
+                            .setMessage("請輸入正確的店家id")
+                            .setPositiveButton("好", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                }
+                            });
+                    builder.create().show();
+                }
             }
         });
 
@@ -77,7 +87,6 @@ public class StoreFragment extends Fragment {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
                                 Intent intent = new Intent(getActivity(), SynTrendSDKActivity.class);
-                                intent.putExtra(MainActivity.ARG_KEY_TYPE, TYPE_STORE);
                                 intent.putExtra(ARG_KEY_STORE_ROUTE_A, customPreference);
                                 intent.putExtra(ARG_KEY_STORE_ROUTE_B, recommendPreference);
                                 startActivity(intent);

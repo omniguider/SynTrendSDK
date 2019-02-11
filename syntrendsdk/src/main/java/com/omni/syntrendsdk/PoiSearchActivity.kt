@@ -131,7 +131,7 @@ class PoiSearchActivity : Activity() {
     private fun doSearchPOI(keyword: String?) {
         Log.e("OKOK", "doSearchPOI")
         var id = DataCacheManager.getInstance().userCurrentFloorPlanId!!
-        if (id == "outdoor")
+        if (id == "outdoor" || id == "919f0ac4-62e4-48ae-8217-dcb707bbcdc9")
             id = DataCacheManager.getInstance().getMainGroundFloorPlanId(this).floorPlanId
         val buildingId = DataCacheManager.getInstance().getBuildingIdByFloorPlanId(this, id)
         if (buildingId != null) {

@@ -27,9 +27,21 @@ public class NavigationRoutePOI implements Serializable {
     private String selected;
     @SerializedName("name")
     private String name;
+    @SerializedName("desc")
+    private String desc;
+    @SerializedName("logo")
+    private String logo;
 
     public String getID() {
         return id;
+    }
+
+    public String getDesc() {
+        return desc;
+    }
+
+    public String getLogo() {
+        return logo;
     }
 
     public String getStoreID() {

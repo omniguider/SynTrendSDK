@@ -11,11 +11,14 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Typeface;
+import android.hardware.Sensor;
+import android.hardware.SensorManager;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
@@ -58,6 +61,7 @@ import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
@@ -127,18 +131,14 @@ public class SynTrendSDKActivity extends BaseActivity implements OnMapReadyCallb
         BeaconConsumer,
         BluetoothAdapter.LeScanCallback {
 
-    public static final LatLng START_LOCATION = new LatLng(25.045202351433, 121.53092354046);
+    public static final LatLng START_LOCATION = new LatLng(25.045130666062, 121.53120953099);
 
-    private static final String ARG_KEY_TYPE = "arg_key_type";
     private static final String ARG_KEY_GUIDE_CATEGORY = "arg_key_guide_category";
-    private static final String TYPE_STORE = "type_store";
-    private static final String TYPE_GUIDE = "type_guide";
-    private static final String TYPE_FACILITY = "type_facility";
     private static final String ARG_KEY_FACILITY_TYPE = "arg_key_facility_type";
     private static final String ARG_KEY_STORE_ROUTE_A = "arg_key_store_route_a";
     private static final String ARG_KEY_STORE_ROUTE_B = "arg_key_store_route_b";
 
-    private String type;
+    //    private String type;
     private String guide_category;
     private String facility_type;
     private String route_custom;
@@ -148,7 +148,6 @@ public class SynTrendSDKActivity extends BaseActivity implements OnMapReadyCallb
     private BeaconManager mBeaconManager;
     private HandlerThread mBBHandlerThread;
     private Handler mBBHandler;
-    private static final float beaconTrigger10 = 10f;
     private String mLastSendBatteryMac;
     final int MSG_LE_START_SCAN = 1000;
     final int MSG_LE_STOP_SCAN = 1001;
@@ -251,6 +250,7 @@ public class SynTrendSDKActivity extends BaseActivity implements OnMapReadyCallb
     private LinearLayout categoryLayout;
     private ImageView searchIcon;
     private ImageView menuIcon;
+    private FrameLayout menuIconLayout;
     private String EndPOIId = "";
     private List<NavigationRoutePOI> routePOIList;
     private List<NavigationRoutePOI> NavigationRoutePOIListAll;
@@ -260,6 +260,13 @@ public class SynTrendSDKActivity extends BaseActivity implements OnMapReadyCallb
     private List<NavigationRoutePOI> NavigationRoutePOIListA;
     private List<NavigationRoutePOI> NavigationRoutePOIListB;
     private boolean initRoute = true;
+    private Marker mNavigationMarker;
+    private boolean mapReady = false;
+    private boolean mapReadyNavi = false;
+    private boolean titleSetting = false;
+    private TextView headerNaviTV;
+    public static boolean withAccelerometer = false;
+    public static boolean withGyroscope = false;
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onEvent(OmniEvent event) {
@@ -272,6 +279,7 @@ public class SynTrendSDKActivity extends BaseActivity implements OnMapReadyCallb
                 break;
 
             case OmniEvent.TYPE_USER_INDOOR_LOCATION:
+                Log.e("OKOK", "TYPE_USER_INDOOR_LOCATION");
                 mLastLocation = (Location) event.getObj();
                 mIsIndoor = true;
 
@@ -282,7 +290,10 @@ public class SynTrendSDKActivity extends BaseActivity implements OnMapReadyCallb
                 String floorPlanId = event.getContent();
                 if (DataCacheManager.getInstance().containsFloor(this, floorPlanId)) {
                     Log.e("@W@", "TYPE_FLOOR_PLAN_CHANGED id : " + floorPlanId);
-                    fetchFloorPlan(floorPlanId, true, DataCacheManager.getInstance().getFloorNumberByPlanId(this, floorPlanId));
+                    if (getIntent().getExtras().containsKey(ARG_KEY_STORE_ROUTE_A) && mNavigationMode != NaviMode.USER_IN_NAVIGATION) {
+                    } else {
+                        fetchFloorPlan(floorPlanId, true, DataCacheManager.getInstance().getFloorNumberByPlanId(this, floorPlanId));
+                    }
                 }
                 break;
         }
@@ -291,6 +302,24 @@ public class SynTrendSDKActivity extends BaseActivity implements OnMapReadyCallb
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        SensorManager sm = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+        List<Sensor> allSensors = sm.getSensorList(Sensor.TYPE_ALL);
+        for (Sensor s : allSensors) {
+            switch (s.getType()) {
+                case Sensor.TYPE_ACCELEROMETER:
+                    withAccelerometer = true;
+                    break;
+                case Sensor.TYPE_GYROSCOPE:
+                    withGyroscope = true;
+                    break;
+            }
+        }
+
+        if (!withAccelerometer || !withGyroscope) {
+            DialogTools.getInstance().showErrorMessage(this, getString(R.string.error_dialog_title_text_normal), getResources().getString(R.string.without_sensor_hint));
+        }
+
         setContentView(R.layout.stsdk_activity_main);
         if (mEventBus == null) {
             mEventBus = EventBus.getDefault();
@@ -302,7 +331,6 @@ public class SynTrendSDKActivity extends BaseActivity implements OnMapReadyCallb
             mTimeHandler.postDelayed(mTimeRunner, 1000);
         }
 
-        type = getIntent().getStringExtra(ARG_KEY_TYPE);
         guide_category = getIntent().getStringExtra(ARG_KEY_GUIDE_CATEGORY);
         facility_type = getIntent().getStringExtra(ARG_KEY_FACILITY_TYPE);
         route_custom = getIntent().getStringExtra(ARG_KEY_STORE_ROUTE_A);
@@ -364,17 +392,40 @@ public class SynTrendSDKActivity extends BaseActivity implements OnMapReadyCallb
     }
 
     @Override
+    public void onLowMemory() {
+        super.onLowMemory();
+        if (mMapFragment != null) {
+            mMapFragment.onLowMemory();
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        if (mMapFragment != null) {
+            mMapFragment.onResume();
+        }
+        super.onResume();
+    }
+
+    @Override
     protected void onPause() {
         super.onPause();
+        if (mMapFragment != null) {
+            mMapFragment.onPause();
+        }
 //        if (mOGService != null) {
 //            mOGService.stopService();
 //        }
-        DialogTools.getInstance().dismissProgress(this);
+//        DialogTools.getInstance().dismissProgress(this);
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        if (mMapFragment != null) {
+            mMapFragment.onDestroy();
+        }
+
         if (mEventBus != null) {
             mEventBus.unregister(this);
         }
@@ -387,6 +438,10 @@ public class SynTrendSDKActivity extends BaseActivity implements OnMapReadyCallb
             mOGService.stopService();
             mOGService.destroy();
             Log.e("OKOK", "mOGService.destroy()");
+        }
+
+        if (mLastLocation != null) {
+            mLastLocation = null;
         }
     }
 
@@ -432,12 +487,12 @@ public class SynTrendSDKActivity extends BaseActivity implements OnMapReadyCallb
         mPOIInfoContentTV = mPOIInfoLayout.findViewById(R.id.poi_info_view_desc);
         mPOIInfoHeaderLayout = mPOIInfoLayout.findViewById(R.id.poi_info_view_header);
         mPOIInfoHeaderArrowIV = mPOIInfoLayout.findViewById(R.id.item_poi_header_iv_arrow);
-        if (getIntent().getExtras().containsKey(ARG_KEY_STORE_ROUTE_A)) {
-            mPOIInfoHeaderArrowIV.setVisibility(View.GONE);
-        }
+//        if (getIntent().getExtras().containsKey(ARG_KEY_STORE_ROUTE_A)) {
+//            mPOIInfoHeaderArrowIV.setVisibility(View.GONE);
+//        }
         mPOIInfoIconCNIV = mPOIInfoHeaderLayout.findViewById(R.id.poi_info_header_view_cniv);
         mPOIInfoTitleTV = mPOIInfoLayout.findViewById(R.id.poi_info_header_view_tv_title);
-        TextView headerNaviTV = mPOIInfoHeaderLayout.findViewById(R.id.poi_info_header_view_tv_navi);
+        headerNaviTV = mPOIInfoHeaderLayout.findViewById(R.id.poi_info_header_view_tv_navi);
         headerNaviTV.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -504,7 +559,9 @@ public class SynTrendSDKActivity extends BaseActivity implements OnMapReadyCallb
             }
         });
 
+        menuIconLayout = findViewById(R.id.map_content_view_fl_action_bar_menu);
         menuIcon = findViewById(R.id.map_content_view_iv_action_bar_menu);
+        menuIcon.setVisibility(View.GONE);
         menuIcon.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -618,7 +675,7 @@ public class SynTrendSDKActivity extends BaseActivity implements OnMapReadyCallb
         }
     }
 
-    private void updateSelectedPOI(POI selectedPoi) {
+    private void updateSelectedPOI(final POI selectedPoi) {
         Log.e("OKOK", "updateSelectedPOI");
         if (selectedPoi.getType().equalsIgnoreCase("store")) {
             selectStore();
@@ -636,23 +693,23 @@ public class SynTrendSDKActivity extends BaseActivity implements OnMapReadyCallb
         }
         BuildingFloor floor = DataCacheManager.getInstance().getSearchFloorPlanId(SynTrendSDKActivity.this, selectedPoi.getId());
         fetchFloorPlan(floor.getFloorPlanId(), false, floor.getNumber());
-        String buildingId = DataCacheManager.getInstance().getBuildingIdByFloorPlanId(this, floor.getFloorPlanId());
-        itemList = DataCacheManager.getInstance().getClusterListByBuildingId(buildingId);
-        Log.e("OKOK", "itemList.size()" + itemList.size());
-        for (int i = 0; i < itemList.size(); i++) {
-            if (itemList.get(i).getPOI().getId() == (selectedPoi.getId())) {
-                Handler handler = new Handler();
-                final int finalI = i;
-                handler.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        selectPOI(itemList.get(finalI));
+        final String buildingId = DataCacheManager.getInstance().getBuildingIdByFloorPlanId(this, floor.getFloorPlanId());
+
+        Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                itemList = DataCacheManager.getInstance().getClusterListByBuildingId(buildingId);
+                Log.e("OKOK", "itemList.size()" + itemList.size());
+                for (int i = 0; i < itemList.size(); i++) {
+                    if (itemList.get(i).getPOI().getId() == (selectedPoi.getId())) {
+                        selectPOI(itemList.get(i));
+                        break;
                     }
-                }, 1000);
-                selectPOI(itemList.get(i));
-                break;
+//                selectPOI(itemList.get(i));
+                }
             }
-        }
+        }, 1000);
     }
 
     class menuAdapter extends BaseAdapter {
@@ -761,10 +818,11 @@ public class SynTrendSDKActivity extends BaseActivity implements OnMapReadyCallb
     }
 
     private void collapseBottomSheet() {
-        Log.e("OKOK", "collapseBottomSheet");
+        Log.e("OKOK", "collapseBottomSheet"+mNavigationMode);
         if (mNavigationMode == NaviMode.USER_IN_NAVIGATION) {
             return;
         }
+        Log.e("OKOK", "collapseBottomSheet111");
         mBottomSheetBehavior.setPeekHeight(0);
         if (mOriginalPOIMarker != null) {
             mOriginalPOIMarker = null;
@@ -775,6 +833,8 @@ public class SynTrendSDKActivity extends BaseActivity implements OnMapReadyCallb
         if (mNavigationMode == NaviMode.USER_IN_NAVIGATION && mEndPOI != null) {
             leaveNavigation();
         }
+
+        setNavigationMode(NaviMode.USER_IN_NAVIGATION);
 
         if (mEndPOI == null) {
             mEndPOI = mCurrentSelectedPOI;
@@ -795,12 +855,13 @@ public class SynTrendSDKActivity extends BaseActivity implements OnMapReadyCallb
 
             }
         } else {
-            if (SynTrendText.isTestMode || mUserMarker == null) {
+            if (SynTrendText.isTestMode || mLastLocation == null) {
                 Log.e("@W@", "#1 TODOHere");
                 getLocationToPRoute(START_LOCATION.latitude, START_LOCATION.longitude);
             } else {
                 if (DataCacheManager.getInstance().isInBuilding(this)) {
-                    getLocationToPRoute(mUserMarker.getPosition().latitude, mUserMarker.getPosition().longitude);
+//                    getLocationToPRoute(mUserMarker.getPosition().latitude, mUserMarker.getPosition().longitude);
+                    getLocationToPRoute(mLastLocation.getLatitude(), mLastLocation.getLongitude());
                 } else {
                     BuildingFloor floor = DataCacheManager.getInstance().getMainGroundFloorPlanId(this);
                     if (floor != null && DataCacheManager.getInstance().getEntrancePOI(floor) != null) {
@@ -827,10 +888,14 @@ public class SynTrendSDKActivity extends BaseActivity implements OnMapReadyCallb
 
             setNavigationMode(NaviMode.NOT_NAVIGATION);
 
+            mapReadyNavi = false;
+
             mEndPOI = null;
             /** marked this line because if start navi when in navi mode already, leaveNavigation() will lose poi info. */
-            mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
-            collapseBottomSheet();
+            if (!getIntent().getExtras().containsKey(ARG_KEY_STORE_ROUTE_A)) {
+                mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+                collapseBottomSheet();
+            }
 
 
             mCurrentRouteList = null;
@@ -842,6 +907,11 @@ public class SynTrendSDKActivity extends BaseActivity implements OnMapReadyCallb
             if (mNaviEndMarker != null) {
                 mNaviEndMarker.remove();
                 mNaviEndMarker = null;
+            }
+
+            if (mNavigationMarker != null) {
+                mNavigationMarker.remove();
+                mNavigationMarker = null;
             }
 
             DataCacheManager.getInstance().clearAllPolyline();
@@ -863,34 +933,51 @@ public class SynTrendSDKActivity extends BaseActivity implements OnMapReadyCallb
                 BuildingFloor floor = DataCacheManager.getInstance().getMainGroundFloorPlanId(this);
                 POI entrancePOI = DataCacheManager.getInstance().getEntrancePOI(floor);
 
-                if (getIntent().getExtras().containsKey(ARG_KEY_STORE_ROUTE_A)
-                        && NavigationRoutePOIListAll != null
-                        && NavigationRoutePOIListAll.size() != 0
-                        && NavigationRoutePOIListAll.size() > NavigationRoutePOIListAllPosition) {
-                    BuildingFloor storeFloor = DataCacheManager.getInstance().getSearchFloorPlanId(
-                            SynTrendSDKActivity.this, Integer.parseInt(NavigationRoutePOIListAll.get(NavigationRoutePOIListAllPosition).getID()));
-                    fetchFloorPlan(storeFloor.getFloorPlanId(), false, NavigationRoutePOIListAll.get(NavigationRoutePOIListAllPosition).getFloorNumber());
-                    cameraPosition = new CameraPosition.Builder(mMap.getCameraPosition())
-                            .bearing((float) 15.5)
-                            .target(new LatLng(Double.parseDouble(NavigationRoutePOIListAll.get(NavigationRoutePOIListAllPosition).getLatitude()),
-                                    Double.parseDouble(NavigationRoutePOIListAll.get(NavigationRoutePOIListAllPosition).getLongitude())))
-                            .zoom(SynTrendText.MAP_ZOOM_LEVEL)
-                            .build();
-                } else {
-                    fetchFloorPlan(floor.getFloorPlanId(), false, floor.getNumber());
-                    cameraPosition = new CameraPosition.Builder(mMap.getCameraPosition())
-                            .bearing((float) 15.5)
-                            .target(new LatLng(entrancePOI.getLatitude(), entrancePOI.getLongitude()))
-                            .zoom(SynTrendText.MAP_ZOOM_LEVEL)
-                            .build();
-                }
+//                if (getIntent().getExtras().containsKey(ARG_KEY_STORE_ROUTE_A)
+//                        && NavigationRoutePOIListAll != null
+//                        && NavigationRoutePOIListAll.size() != 0
+//                        && NavigationRoutePOIListAll.size() > NavigationRoutePOIListAllPosition) {
+//                    BuildingFloor storeFloor = DataCacheManager.getInstance().getSearchFloorPlanId(
+//                            SynTrendSDKActivity.this, Integer.parseInt(NavigationRoutePOIListAll.get(NavigationRoutePOIListAllPosition).getID()));
+//                    fetchFloorPlan(storeFloor.getFloorPlanId(), false, NavigationRoutePOIListAll.get(NavigationRoutePOIListAllPosition).getFloorNumber());
+//                    cameraPosition = new CameraPosition.Builder(mMap.getCameraPosition())
+//                            .bearing((float) 15.5)
+//                            .target(new LatLng(Double.parseDouble(NavigationRoutePOIListAll.get(NavigationRoutePOIListAllPosition).getLatitude()),
+//                                    Double.parseDouble(NavigationRoutePOIListAll.get(NavigationRoutePOIListAllPosition).getLongitude())))
+//                            .zoom(SynTrendText.MAP_ZOOM_LEVEL)
+//                            .build();
+//                } else {
+                fetchFloorPlan(floor.getFloorPlanId(), false, floor.getNumber());
+                cameraPosition = new CameraPosition.Builder(mMap.getCameraPosition())
+                        .bearing((float) 15.5)
+                        .target(new LatLng(entrancePOI.getLatitude(), entrancePOI.getLongitude()))
+                        .zoom(SynTrendText.MAP_ZOOM_LEVEL)
+                        .build();
+//                }
 
             } else {
+                fetchFloorPlan(userCurrentFloorPlanId, true, DataCacheManager.getInstance().getFloorNumberByPlanId(this, userCurrentFloorPlanId));
                 cameraPosition = new CameraPosition.Builder()
-                        .target(mUserMarker.getPosition())
+                        .target(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude()))
                         .zoom(SynTrendText.MAP_ZOOM_LEVEL)
-                        .bearing(mUserMarker.getRotation())
+//                        .bearing(mUserMarker.getRotation())
+                        .bearing((float) 15.5)
                         .tilt(0)
+                        .build();
+            }
+
+            if (getIntent().getExtras().containsKey(ARG_KEY_STORE_ROUTE_A)
+                    && NavigationRoutePOIListAll != null
+                    && NavigationRoutePOIListAll.size() != 0
+                    && NavigationRoutePOIListAll.size() > NavigationRoutePOIListAllPosition) {
+                BuildingFloor storeFloor = DataCacheManager.getInstance().getSearchFloorPlanId(
+                        SynTrendSDKActivity.this, Integer.parseInt(NavigationRoutePOIListAll.get(NavigationRoutePOIListAllPosition).getID()));
+                fetchFloorPlan(storeFloor.getFloorPlanId(), false, NavigationRoutePOIListAll.get(NavigationRoutePOIListAllPosition).getFloorNumber());
+                cameraPosition = new CameraPosition.Builder(mMap.getCameraPosition())
+                        .bearing((float) 15.5)
+                        .target(new LatLng(Double.parseDouble(NavigationRoutePOIListAll.get(NavigationRoutePOIListAllPosition).getLatitude()),
+                                Double.parseDouble(NavigationRoutePOIListAll.get(NavigationRoutePOIListAllPosition).getLongitude())))
+                        .zoom(SynTrendText.MAP_ZOOM_LEVEL)
                         .build();
             }
 
@@ -962,12 +1049,15 @@ public class SynTrendSDKActivity extends BaseActivity implements OnMapReadyCallb
     }
 
     private void showUserPosition() {
+        Log.e("OKOK", "showUserPosition");
         if (!mIsMapInited) {
             mIsMapInited = true;
             mMapFragment.getMapAsync(this);
         }
-        LatLng current = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
-        addUserMarker(current, mLastLocation);
+        if (mLastLocation != null) {
+            LatLng current = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
+            addUserMarker(current, mLastLocation);
+        }
     }
 
     private void checkMapInit() {
@@ -978,10 +1068,11 @@ public class SynTrendSDKActivity extends BaseActivity implements OnMapReadyCallb
 
     @Override
     public void onInfoWindowClose(Marker marker) {
+        Log.e("OKOK", "onInfoWindowClose");
         if (marker.getTag() == null) {
             return;
         }
-        if (!getIntent().getExtras().containsKey(ARG_KEY_STORE_ROUTE_A)) {
+        if (!getIntent().getExtras().containsKey(ARG_KEY_STORE_ROUTE_A) ) {
 //            POI poi = (POI) marker.getTag();
             marker.setIcon(BitmapDescriptorFactory.fromResource(((POI) marker.getTag()).getPOIIconRes(false)));
             collapseBottomSheet();
@@ -991,6 +1082,13 @@ public class SynTrendSDKActivity extends BaseActivity implements OnMapReadyCallb
     @Override
     public void onMapReady(GoogleMap googleMap) {
         Log.e("OKOK", "onMapReady");
+//
+//        if (mapReady) {
+//            return;
+//        } else {
+//            mapReady = true;
+//        }
+
         mMap = googleMap;
         mMap.setOnInfoWindowCloseListener(this);
 
@@ -1004,9 +1102,12 @@ public class SynTrendSDKActivity extends BaseActivity implements OnMapReadyCallb
             }
         });
 
-        mMap.setMapType(GoogleMap.MAP_TYPE_TERRAIN);
+        mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
         mMap.getUiSettings().setZoomControlsEnabled(false);
         mMap.getUiSettings().setMapToolbarEnabled(false);
+        mMap.setBuildingsEnabled(false);
+        mMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(
+                this, R.raw.style_json));
 
         String userCurrentFloorPlanId = DataCacheManager.getInstance().getUserCurrentFloorPlanId();
         Log.e("OKOK", "userCurrentFloorPlanId" + userCurrentFloorPlanId);
@@ -1021,13 +1122,19 @@ public class SynTrendSDKActivity extends BaseActivity implements OnMapReadyCallb
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(current, SynTrendText.MAP_ZOOM_LEVEL));
             }
 
-            menuIcon.setVisibility(View.GONE);
             searchIcon.setVisibility(View.GONE);
             categoryLayout.setVisibility(View.GONE);
             mNaviInfoIconCNIV.setVisibility(View.GONE);
             mNaviInfoTitleTV.setText(facility_type);
 
-            getEmergencyRoute(facility_type);
+            DialogTools.getInstance().showProgress(this);
+            Handler handler = new Handler();
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    getEmergencyRoute(facility_type);
+                }
+            }, 7000);
 
         } else if (getIntent().getExtras().containsKey(ARG_KEY_STORE_ROUTE_A)) {
 
@@ -1036,15 +1143,25 @@ public class SynTrendSDKActivity extends BaseActivity implements OnMapReadyCallb
                 LatLng current = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
                 addUserMarker(current, mLastLocation);
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(current, SynTrendText.MAP_ZOOM_LEVEL));
+            } else {
+                mEventBus.post(new OmniEvent(OmniEvent.TYPE_REQUEST_LAST_LOCATION, ""));
             }
 
-//            menuIcon.setVisibility(View.GONE);
+            menuIconLayout.setVisibility(View.VISIBLE);
+            menuIcon.setVisibility(View.VISIBLE);
             searchIcon.setVisibility(View.GONE);
             categoryLayout.setVisibility(View.GONE);
             mNaviInfoIconCNIV.setVisibility(View.GONE);
             mNaviInfoTitleTV.setText(facility_type);
 
-            getRecommendRoute(route_custom, route_recommend);
+            DialogTools.getInstance().showProgress(this);
+            Handler handler = new Handler();
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    getRecommendRoute(route_custom, route_recommend);
+                }
+            }, 7000);
 
         } else {
 
@@ -1067,7 +1184,18 @@ public class SynTrendSDKActivity extends BaseActivity implements OnMapReadyCallb
                     fetchFloorPlan(userCurrentFloorPlanId, true, DataCacheManager.getInstance().getFloorNumberByPlanId(this, userCurrentFloorPlanId));
                     LatLng current = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
                     addUserMarker(current, mLastLocation);
-                    mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(current, SynTrendText.MAP_ZOOM_LEVEL));
+//                    mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(current, SynTrendText.MAP_ZOOM_LEVEL));
+                    mMap.animateCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition.Builder(mMap.getCameraPosition())
+                            .bearing((float) 15.5)
+                            .target(current)
+                            .zoom(SynTrendText.MAP_ZOOM_LEVEL)
+                            .build()));
+                } else {
+                    mMap.animateCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition.Builder(mMap.getCameraPosition())
+                            .bearing((float) 15.5)
+                            .target(START_LOCATION)
+                            .zoom(SynTrendText.MAP_ZOOM_LEVEL)
+                            .build()));
                 }
             }
         }
@@ -1152,7 +1280,7 @@ public class SynTrendSDKActivity extends BaseActivity implements OnMapReadyCallb
                                 final boolean hasNavi, final String floorLevel) {
         Log.e("OKOK", "fetchFloorPlan" + id);
         if (!NetworkManager.getInstance().isNetworkAvailable(this)) {
-            DialogTools.getInstance().dismissProgress(this);
+//            DialogTools.getInstance().dismissProgress(this);
             Log.e("@W@", "--- fetchFloorPlan show no network");
             DialogTools.getInstance().showNoNetworkMessage(this);
             return;
@@ -1179,6 +1307,7 @@ public class SynTrendSDKActivity extends BaseActivity implements OnMapReadyCallb
                         DataCacheManager.getInstance().setCurrentShowFloor(new OmniFloor(floorLevel, id));
                         Log.e("@W@", "fetchFloorPlan floorLevel : " + DataCacheManager.getInstance().getCurrentShowFloor().getFloorLevel() +
                                 ", floorPlanId : " + DataCacheManager.getInstance().getCurrentShowFloor().getFloorPlanId());
+                        Log.e("@W@", "getUserCurrentFloorLevel floorLevel : " + DataCacheManager.getInstance().getUserCurrentFloorLevel(SynTrendSDKActivity.this));
 
                         runOnUiThread(new Runnable() {
                             @Override
@@ -1210,8 +1339,11 @@ public class SynTrendSDKActivity extends BaseActivity implements OnMapReadyCallb
                                 mUserMarker = null;
                             }
                             if (mLastLocation != null) {
-                                addUserMarker(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude()),
-                                        mLastLocation);
+                                if (DataCacheManager.getInstance().getCurrentShowFloor().getFloorLevel()
+                                        .equals(DataCacheManager.getInstance().getUserCurrentFloorLevel(SynTrendSDKActivity.this))) {
+                                    addUserMarker(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude()),
+                                            mLastLocation);
+                                }
                             }
                             if (naviStartPOI != null && mNaviStartMarker != null) {
                                 mNaviStartMarker.setTag(naviStartPOI);
@@ -1248,6 +1380,7 @@ public class SynTrendSDKActivity extends BaseActivity implements OnMapReadyCallb
                                 TileOverlay previousTile = mTileOverlayMap.get(buildingId);
                                 if (previousTile != null) {
                                     previousTile.remove();
+                                    previousTile.clearTileCache();
                                 }
                             } else {
                                 mTileOverlayMap = new HashMap<>();
@@ -1286,6 +1419,10 @@ public class SynTrendSDKActivity extends BaseActivity implements OnMapReadyCallb
 //                                    }
 //
 //                                } else {
+                                if (!DataCacheManager.getInstance().getCurrentShowFloor().getFloorLevel()
+                                        .equals(DataCacheManager.getInstance().getUserCurrentFloorLevel(SynTrendSDKActivity.this))) {
+                                    mapReadyNavi = false;
+                                }
                                 startNavigation(mCurrentRouteList);
 //                                }
                             }
@@ -1317,8 +1454,9 @@ public class SynTrendSDKActivity extends BaseActivity implements OnMapReadyCallb
         NavigationRoutePOIListAll = new ArrayList<>();
 
         for (final NavigationRoutePOI routePOI : routes) {
-            if ((routePOI.getPoisType().equalsIgnoreCase("store") ||
-                    routePOI.getPoisType().equalsIgnoreCase("Clapper Theater")
+            if ((routePOI.getPoisType().equalsIgnoreCase("store")
+                    || routePOI.getPoisType().equalsIgnoreCase("Information")
+                    || routePOI.getPoisType().equalsIgnoreCase("Clapper Theater")
                     || routePOI.getPoisType().equalsIgnoreCase("Clapper studio")
                     || routePOI.getPoisType().equalsIgnoreCase("Event space")
                     || routePOI.getPoisType().equalsIgnoreCase("Restaurant")
@@ -1362,10 +1500,10 @@ public class SynTrendSDKActivity extends BaseActivity implements OnMapReadyCallb
             if (previousPOI == null || poi.getFloorNumber().equals(previousPOI.getFloorNumber())) {
                 pointList.add(point);
                 if (i == routes.size() - 1) {
-                    drawPolyline(poi.getFloorNumber(), pointList, getResources().getColor(R.color.red));
+                    drawPolyline(poi.getFloorNumber(), pointList, getResources().getColor(R.color.blue_41), SynTrendText.STORE_POLYLINE_WIDTH);
                 }
             } else {
-                drawPolyline(previousPOI.getFloorNumber(), pointList, getResources().getColor(R.color.red));
+                drawPolyline(previousPOI.getFloorNumber(), pointList, getResources().getColor(R.color.blue_41), SynTrendText.STORE_POLYLINE_WIDTH);
                 pointList.clear();
                 pointList.add(point);
             }
@@ -1383,8 +1521,9 @@ public class SynTrendSDKActivity extends BaseActivity implements OnMapReadyCallb
         }
 
         for (final NavigationRoutePOI routePOI : routes) {
-            if ((routePOI.getPoisType().equalsIgnoreCase("store") ||
-                    routePOI.getPoisType().equalsIgnoreCase("Clapper Theater")
+            if ((routePOI.getPoisType().equalsIgnoreCase("store")
+                    || routePOI.getPoisType().equalsIgnoreCase("Information")
+                    || routePOI.getPoisType().equalsIgnoreCase("Clapper Theater")
                     || routePOI.getPoisType().equalsIgnoreCase("Clapper studio")
                     || routePOI.getPoisType().equalsIgnoreCase("Event space")
                     || routePOI.getPoisType().equalsIgnoreCase("Restaurant")
@@ -1400,7 +1539,7 @@ public class SynTrendSDKActivity extends BaseActivity implements OnMapReadyCallb
                             Marker storeMarker;
                             storeMarker = mMap.addMarker(new MarkerOptions()
                                     .flat(false)
-                                    .icon(BitmapDescriptorFactory.fromResource(R.mipmap.icon_terminal_point_green))
+                                    .icon(BitmapDescriptorFactory.fromResource(R.mipmap.icon_terminal_point))
                                     .position(routePOI.getLocation())
                                     .zIndex(SynTrendText.MARKER_Z_INDEX));
                             storeMarker.setTag(routePOI);
@@ -1452,7 +1591,9 @@ public class SynTrendSDKActivity extends BaseActivity implements OnMapReadyCallb
             mNaviInfoIconCNIV.setVisibility(View.VISIBLE);
             NetworkManager.getInstance().setNetworkImage(this, mNaviInfoIconCNIV, "", R.mipmap.syn_poi_store, R.mipmap.syn_poi_information);
             mNaviInfoTitleTV.setText(NavigationRoutePOIListAll.get(NavigationRoutePOIListAllPosition).getName());
-
+            mPOIInfoContentTV.setText(NavigationRoutePOIListAll.get(NavigationRoutePOIListAllPosition).getDesc());
+            NetworkManager.getInstance().setNetworkImage(this, mPOIInfoPicNIV,
+                    NavigationRoutePOIListAll.get(NavigationRoutePOIListAllPosition).getLogo());
 
             runOnUiThread(new Runnable() {
                 @Override
@@ -1470,10 +1611,30 @@ public class SynTrendSDKActivity extends BaseActivity implements OnMapReadyCallb
         }
     }
 
-    private void startNavigation(List<NavigationRoutePOI> routes) {
+    private void startNavigation(final List<NavigationRoutePOI> routes) {
         Log.e("@W@", "startNavigation");
 
+        setNavigationMode(NaviMode.USER_IN_NAVIGATION);
+
         mCurrentRouteList = routes;
+
+        if (!mapReadyNavi) {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Handler handler = new Handler();
+                    handler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (DataCacheManager.getInstance().getCurrentShowFloor().getFloorLevel()
+                                    .equals(DataCacheManager.getInstance().getUserCurrentFloorLevel(SynTrendSDKActivity.this))) {
+                                mapReadyNavi = true;
+                            }
+                        }
+                    }, 2000);
+                }
+            });
+        }
 
         if (!getIntent().getExtras().containsKey(ARG_KEY_STORE_ROUTE_A)) {
             this.runOnUiThread(new Runnable() {
@@ -1501,10 +1662,10 @@ public class SynTrendSDKActivity extends BaseActivity implements OnMapReadyCallb
             if (previousPOI == null || poi.getFloorNumber().equals(previousPOI.getFloorNumber())) {
                 pointList.add(point);
                 if (i == routes.size() - 1) {
-                    drawPolyline(poi.getFloorNumber(), pointList, this.getResources().getColor(R.color.blue_41));
+                    drawPolyline(poi.getFloorNumber(), pointList, this.getResources().getColor(R.color.red), SynTrendText.POLYLINE_WIDTH);
                 }
             } else {
-                drawPolyline(previousPOI.getFloorNumber(), pointList, this.getResources().getColor(R.color.blue_41));
+                drawPolyline(previousPOI.getFloorNumber(), pointList, this.getResources().getColor(R.color.red), SynTrendText.POLYLINE_WIDTH);
                 pointList.clear();
                 pointList.add(point);
 //                colorIndex++;
@@ -1515,8 +1676,6 @@ public class SynTrendSDKActivity extends BaseActivity implements OnMapReadyCallb
 //                mRouteInfoLL.setVisibility(View.VISIBLE);
 //                mSearchTV.setVisibility(View.GONE);
 //        DataCacheManager.getInstance().setCurrentRoutePointList(pointList);
-
-        setNavigationMode(NaviMode.USER_IN_NAVIGATION);
 
         final NavigationRoutePOI firstRoutePOI = routes.get(0);
         final NavigationRoutePOI lastRoutePOI = routes.get(routes.size() - 1);
@@ -1551,7 +1710,7 @@ public class SynTrendSDKActivity extends BaseActivity implements OnMapReadyCallb
                     mNaviEndMarker = mMap.addMarker(new MarkerOptions()
                             .flat(false)
 //                .anchor(0.5f, 0.5f)
-                            .icon(BitmapDescriptorFactory.fromResource(R.mipmap.icon_terminal_point))
+                            .icon(BitmapDescriptorFactory.fromResource(R.mipmap.icon_terminal_point_red))
                             .position(lastRoutePOI.getLocation())
                             .zIndex(SynTrendText.MARKER_Z_INDEX));
 
@@ -1573,7 +1732,16 @@ public class SynTrendSDKActivity extends BaseActivity implements OnMapReadyCallb
                     Log.e("@W@", "mIsIndoor" + mIsIndoor);
                     String userCurrentFloorPlanId = DataCacheManager.getInstance().getUserCurrentFloorPlanId();
                     if (mIsIndoor && !userCurrentFloorPlanId.equals("919f0ac4-62e4-48ae-8217-dcb707bbcdc9")) {
-                        moveCameraByUserLocation(userFloorPointList);
+//                        moveCameraByUserLocation(userFloorPointList);
+                    } else {
+//                        Log.e("OKOK", "mNavigationMarker");
+//                        mNavigationMarker = mMap.addMarker(new MarkerOptions()
+//                                .position(firstRoutePOI.getLocation())
+//                                .rotation((float) SphericalUtil.computeHeading(routes.get(1).getLocation(), routes.get(2).getLocation()))
+//                                .flat(true)
+//                                .zIndex(SynTrendText.MARKER_Z_INDEX)
+//                                .icon(BitmapDescriptorFactory.fromResource(R.mipmap.icon_navigation_start)));
+//                        mNavigationMarker.setVisible(true);
                     }
                 }
             }
@@ -1586,8 +1754,19 @@ public class SynTrendSDKActivity extends BaseActivity implements OnMapReadyCallb
             @Override
             public void run() {
                 if (mNavigationMode == NaviMode.USER_IN_NAVIGATION) {
-                    mPOIInfoLayout.setVisibility(View.GONE);
-                    mNaviInfoRL.setVisibility(View.VISIBLE);
+//                    mPOIInfoLayout.setVisibility(View.GONE);
+                    if (getIntent().getExtras().containsKey(ARG_KEY_FACILITY_TYPE)) {
+                        mNaviInfoRL.setVisibility(View.VISIBLE);
+                    }
+                    headerNaviTV.setText(R.string.map_page_stop_navi);
+                    headerNaviTV.setTextColor(getResources().getColor(R.color.red_91));
+                    headerNaviTV.setBackgroundResource(R.mipmap.rectangle_copy_7);
+                    headerNaviTV.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            leaveNavigation();
+                        }
+                    });
                     if (mEndPOI != null) {
                         NetworkManager.getInstance().setNetworkImage(SynTrendSDKActivity.this,
                                 mNaviInfoIconCNIV,
@@ -1598,8 +1777,19 @@ public class SynTrendSDKActivity extends BaseActivity implements OnMapReadyCallb
                     }
 //            mEventBus.post(new OmniEvent(OmniEvent.TYPE_NAVIGATION_MODE_CHANGED, OmniEvent.EVENT_CONTENT_USER_IN_NAVIGATION));
                 } else {
-                    mPOIInfoLayout.setVisibility(View.VISIBLE);
-                    mNaviInfoRL.setVisibility(View.GONE);
+//                    mPOIInfoLayout.setVisibility(View.VISIBLE);
+                    if (getIntent().getExtras().containsKey(ARG_KEY_FACILITY_TYPE)) {
+                        mNaviInfoRL.setVisibility(View.GONE);
+                    }
+                    headerNaviTV.setText(R.string.map_page_start_navi);
+                    headerNaviTV.setTextColor(getResources().getColor(android.R.color.white));
+                    headerNaviTV.setBackgroundResource(R.drawable.solid_round_rectangle_navi_blue);
+                    headerNaviTV.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            getNavigationData();
+                        }
+                    });
 //            mEventBus.post(new OmniEvent(OmniEvent.TYPE_NAVIGATION_MODE_CHANGED, OmniEvent.EVENT_CONTENT_NOT_NAVIGATION));
                 }
             }
@@ -1608,6 +1798,11 @@ public class SynTrendSDKActivity extends BaseActivity implements OnMapReadyCallb
 
     private void addUserMarker(LatLng position, Location location) {
         if (mMap == null) {
+            return;
+        }
+
+        if (!DataCacheManager.getInstance().getCurrentShowFloor().getFloorLevel()
+                .equals(DataCacheManager.getInstance().getUserCurrentFloorLevel(SynTrendSDKActivity.this))) {
             return;
         }
 
@@ -1652,7 +1847,8 @@ public class SynTrendSDKActivity extends BaseActivity implements OnMapReadyCallb
 //                    }
 //                }
                 String userCurrentFloorPlanId = DataCacheManager.getInstance().getUserCurrentFloorPlanId();
-                if (mIsIndoor && !userCurrentFloorPlanId.equals("919f0ac4-62e4-48ae-8217-dcb707bbcdc9")) {
+                Log.e("OKOK", "mapReadyNavi" + mapReadyNavi);
+                if (mIsIndoor && !userCurrentFloorPlanId.equals("919f0ac4-62e4-48ae-8217-dcb707bbcdc9") && mapReadyNavi) {
                     moveCameraByUserLocation(pointList);
                 }
             }
@@ -1905,7 +2101,7 @@ public class SynTrendSDKActivity extends BaseActivity implements OnMapReadyCallb
     }
 
     private void moveCameraByUserLocation(List<LatLng> pointList) {
-        Log.v("@W@", "moveCameraByUserLocation");
+        Log.e("OKOK", "moveCameraByUserLocation");
         if (pointList != null && mUserMarker != null) {
             LatLng userPosition = mUserMarker.getPosition();
             LatLng previousPoint = null;
@@ -1969,6 +2165,23 @@ public class SynTrendSDKActivity extends BaseActivity implements OnMapReadyCallb
 
             LatLng pointOnRoute = SphericalUtil.computeOffset(closestPoint, closestDistance, heading);
 
+//            if (mNavigationMarker == null) {
+//                mNavigationMarker = mMap.addMarker(new MarkerOptions()
+//                        .position(pointOnRoute)
+//                        .rotation((float) heading)
+//                        .flat(true)
+//                        .zIndex(SynTrendText.MARKER_Z_INDEX)
+//                        .icon(BitmapDescriptorFactory.fromResource(R.mipmap.icon_navigation_start)));
+//                mNavigationMarker.setVisible(DataCacheManager.getInstance().getCurrentShowFloor().getFloorLevel()
+//                        .equals(DataCacheManager.getInstance().getUserCurrentFloorLevel(this)));
+//            } else {
+//                mNavigationMarker.setPosition(pointOnRoute);
+//                mNavigationMarker.setRotation((float) heading);
+//                mNavigationMarker.setZIndex(SynTrendText.MARKER_Z_INDEX);
+//                mNavigationMarker.setVisible(DataCacheManager.getInstance().getCurrentShowFloor().getFloorLevel()
+//                        .equals(DataCacheManager.getInstance().getUserCurrentFloorLevel(this)));
+//            }
+
             int zoomLevel = (int) mMap.getCameraPosition().zoom;
             CameraPosition cameraPosition = new CameraPosition.Builder()
 //                    .target(pointOnRoute)
@@ -1991,12 +2204,15 @@ public class SynTrendSDKActivity extends BaseActivity implements OnMapReadyCallb
             }
 
             if (mCurrentRouteList != null) {
+                Log.e("OKOK", "mCurrentRouteList != null");
                 int lastOfArr = mCurrentRouteList.size() - 1;
                 double routeLat = Double.parseDouble(mCurrentRouteList.get(lastOfArr).getLatitude());
                 double routeLon = Double.parseDouble(mCurrentRouteList.get(lastOfArr).getLongitude());
                 float userDisToTarget = getDistance(pointOnRoute, routeLat, routeLon);
-                Log.v("@W@", "userDisToTarget" + userDisToTarget);
-                if (userDisToTarget <= 5) {
+                Log.e("OKOK", "userDisToTarget" + userDisToTarget);
+                if (userDisToTarget <= 5 && userDisToTarget > 0.5 &&
+                        mCurrentRouteList.get(lastOfArr).getFloorNumber()
+                                .equals(DataCacheManager.getInstance().getUserCurrentFloorLevel(SynTrendSDKActivity.this))) {
                     if (getIntent().getExtras().containsKey(ARG_KEY_STORE_ROUTE_A)) {
                         if (NavigationRoutePOIListA.size() != 0) {
                             if (NavigationRoutePOIListA.get(0).getStoreID().equals(NavigationRoutePOIListAll.get(NavigationRoutePOIListAllPosition).getStoreID())) {
@@ -2061,10 +2277,13 @@ public class SynTrendSDKActivity extends BaseActivity implements OnMapReadyCallb
         Location l1 = new Location("One");
         l1.setLatitude(userlatlong.latitude);
         l1.setLongitude(userlatlong.longitude);
-
+        Log.e("OKOK", "userlatlong.latitude" + userlatlong.latitude);
+        Log.e("OKOK", "userlatlong.longitude" + userlatlong.longitude);
         Location l2 = new Location("Two");
         l2.setLatitude(routeLat);
         l2.setLongitude(routeLon);
+        Log.e("OKOK", "routeLat" + routeLat);
+        Log.e("OKOK", "routeLon" + routeLon);
 
         float distance = l1.distanceTo(l2);
         String dist = distance + " M";
@@ -2111,14 +2330,14 @@ public class SynTrendSDKActivity extends BaseActivity implements OnMapReadyCallb
     }
 
     private void drawPolyline(final String floorNumber, final List<LatLng> pointList,
-                              int colorIndex) {
+                              int colorIndex, float width) {
         Log.e("OKOK", "drawPolyline colorIndex" + colorIndex);
         PolylineOptions lineOptions = null;
 
         if (!pointList.isEmpty()) {
             lineOptions = new PolylineOptions()
                     .addAll(pointList)
-                    .width(SynTrendText.POLYLINE_WIDTH)
+                    .width(width)
                     .color(colorIndex);
         }
         if (lineOptions != null) {
@@ -2225,6 +2444,9 @@ public class SynTrendSDKActivity extends BaseActivity implements OnMapReadyCallb
             mEventBus.post(new OmniEvent(OmniEvent.TYPE_REQUEST_LAST_LOCATION, ""));
 
         } else {
+            Log.e("OKOK", "getEmergencyRoute type" + type);
+            mEventBus.post(new OmniEvent(OmniEvent.TYPE_REQUEST_LAST_LOCATION, ""));
+
             String floorPlanId = DataCacheManager.getInstance().getUserCurrentFloorPlanId();
             String buildingId = DataCacheManager.getInstance().getBuildingIdByFloorPlanId(this, floorPlanId);
             String floorLevel = DataCacheManager.getInstance().getUserCurrentFloorLevel(this);
@@ -2232,7 +2454,7 @@ public class SynTrendSDKActivity extends BaseActivity implements OnMapReadyCallb
             Double lng;
 
             BuildingFloor floor = DataCacheManager.getInstance().getMainGroundFloorPlanId(this);
-            if (mIsIndoor && !floorPlanId.equals("919f0ac4-62e4-48ae-8217-dcb707bbcdc9")) {
+            if (mIsIndoor && !floorPlanId.equals("919f0ac4-62e4-48ae-8217-dcb707bbcdc9") && mLastLocation != null) {
                 fetchFloorPlan(floorPlanId, false, DataCacheManager.getInstance().getFloorNumberByPlanId(this, floorPlanId));
                 lat = mLastLocation.getLatitude();
                 lng = mLastLocation.getLongitude();
@@ -2244,7 +2466,7 @@ public class SynTrendSDKActivity extends BaseActivity implements OnMapReadyCallb
                 buildingId = "1";
                 floorLevel = "1";
             }
-
+            Log.e("OKOK", "getEmergencyRoute type" + buildingId + floorLevel + lat + lng + type);
             LocationApi.getInstance().getEmergencyRoute(this,
                     buildingId,
                     floorLevel,
@@ -2254,15 +2476,19 @@ public class SynTrendSDKActivity extends BaseActivity implements OnMapReadyCallb
                     new NetworkManager.NetworkManagerListener<NavigationRoutePOI[]>() {
                         @Override
                         public void onSucceed(NavigationRoutePOI[] routePOIs) {
+                            DialogTools.getInstance().dismissProgress(SynTrendSDKActivity.this);
                             if (routePOIs.length != 0) {
                                 startNavigation(Arrays.asList(routePOIs));
                                 final String lastPOIFloorLevel = routePOIs[routePOIs.length - 1].getFloorNumber();
                                 runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
-                                        mNaviInfoTitleTV.setText((lastPOIFloorLevel.contains("-") ?
-                                                lastPOIFloorLevel.replace("-", "B") :
-                                                lastPOIFloorLevel + "F") + " " + mNaviInfoTitleTV.getText());
+                                        if (!titleSetting) {
+                                            mNaviInfoTitleTV.setText((lastPOIFloorLevel.contains("-") ?
+                                                    lastPOIFloorLevel.replace("-", "B") :
+                                                    lastPOIFloorLevel + "F") + " " + mNaviInfoTitleTV.getText());
+                                            titleSetting = true;
+                                        }
                                     }
                                 });
                             } else {
@@ -2303,7 +2529,7 @@ public class SynTrendSDKActivity extends BaseActivity implements OnMapReadyCallb
             Double lng;
 
             final BuildingFloor floor = DataCacheManager.getInstance().getMainGroundFloorPlanId(this);
-            if (mIsIndoor && !floorPlanId.equals("919f0ac4-62e4-48ae-8217-dcb707bbcdc9")) {
+            if (mIsIndoor && !floorPlanId.equals("919f0ac4-62e4-48ae-8217-dcb707bbcdc9") && mLastLocation != null) {
 //                fetchFloorPlan(floorPlanId, false, DataCacheManager.getInstance().getFloorNumberByPlanId(this, floorPlanId));
                 lat = mLastLocation.getLatitude();
                 lng = mLastLocation.getLongitude();
@@ -2325,6 +2551,7 @@ public class SynTrendSDKActivity extends BaseActivity implements OnMapReadyCallb
                     new NetworkManager.NetworkManagerListener<NavigationRoutePOI[]>() {
                         @Override
                         public void onSucceed(NavigationRoutePOI[] routePOIs) {
+                            DialogTools.getInstance().dismissProgress(SynTrendSDKActivity.this);
                             if (routePOIs.length != 0) {
 //                                startNavigation(Arrays.asList(routePOIs));
                                 routePOIList = new ArrayList<>();

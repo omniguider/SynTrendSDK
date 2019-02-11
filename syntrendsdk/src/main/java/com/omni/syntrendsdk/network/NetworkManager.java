@@ -122,7 +122,7 @@ public class NetworkManager {
         ImageLoader imageLoader = new ImageLoader(getRequestQueue(context), lruImageCache);
 
         networkImageView.setDefaultImageResId(defaultIconResId);
-        networkImageView.setErrorImageResId(errorIconResId == -1 ? R.mipmap.nlpi_logo : errorIconResId);
+        networkImageView.setErrorImageResId(errorIconResId == -1 ? R.mipmap.syn_poi_information : errorIconResId);
         networkImageView.setImageUrl(url, imageLoader);
     }
 
@@ -302,7 +302,7 @@ public class NetworkManager {
                                    final Class<T> responseClass,
                                    final NetworkManagerListener<T> listener) {
 
-        addPostRequest(activity, true, call, responseClass, listener);
+        addPostRequest(activity, false, call, responseClass, listener);
 
     }
 
@@ -417,7 +417,7 @@ public class NetworkManager {
                                                    final Class<T[]> responseClass,
                                                    final NetworkManagerListener<T[]> listener) {
 
-        addPostRequestToCommonArrayObj(activity, true, call, responseClass, listener);
+        addPostRequestToCommonArrayObj(activity, false, call, responseClass, listener);
     }
 
     public <T> void addPostRequestToCommonArrayObj(final Activity activity,

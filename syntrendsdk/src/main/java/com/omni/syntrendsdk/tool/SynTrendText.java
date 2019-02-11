@@ -49,6 +49,7 @@ public class SynTrendText {
     public static final int MAP_MIN_ZOOM_LEVEL = 16;
     public static final int MAP_MAX_ZOOM_LEVEL = 22;
     public static final float POLYLINE_WIDTH = 20.0f;
+    public static final float STORE_POLYLINE_WIDTH = 12.0f;
     public static final int POLYLINE_Z_INDEX = 100;
 
     public static final String KEY_FIREBASE_DATA_TYPE = "type";

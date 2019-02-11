@@ -198,7 +198,7 @@ public class DataCacheManager {
             return null;
         } else {
             for (POI poi : floor.getPois()) {
-                if (poi.getName().equals("顧客服務中心")) {
+                if (poi.getName().equals("中心廣場入口")) {
 //                if (poi.getIsEntrance().equals("Y")) {
                     Log.e("OKOK", "poi.getName" + poi.getName());
                     return poi;

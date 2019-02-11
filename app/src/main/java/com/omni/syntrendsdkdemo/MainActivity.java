@@ -12,8 +12,6 @@ import com.omni.syntrendsdk.SynTrendSDKActivity;
 
 public class MainActivity extends AppCompatActivity {
 
-    public static final String ARG_KEY_TYPE = "type";
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

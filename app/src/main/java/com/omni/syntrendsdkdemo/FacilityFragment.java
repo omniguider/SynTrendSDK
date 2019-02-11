@@ -99,7 +99,6 @@ public class FacilityFragment extends Fragment {
                 }
 
                 Intent intent = new Intent(getActivity(), SynTrendSDKActivity.class);
-                intent.putExtra(MainActivity.ARG_KEY_TYPE, TYPE_FACILITY);
                 intent.putExtra(ARG_KEY_FACILITY_TYPE, type);
                 startActivity(intent);
             }

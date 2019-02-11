@@ -23,8 +23,8 @@
     <string name="error_dialog_title_text_json_parse_error">發生未預期的錯誤</string>
     <string name="dialog_message_network_connect_not_good">此處無可供服務流量之網路，請移動至適當區域，檢查連線狀況後再試。</string>
     <string name="error_dialog_title_text_normal">請注意</string>
-    <string name="dialog_message_route_empty">取得路徑錯誤，請洽系統資訊科。</string>
-    <string name="dialog_message_arrive_destination">您已抵達終點</string>
+    <string name="dialog_message_route_empty">取得路徑錯誤</string>
+    <string name="dialog_message_arrive_destination">您已抵達目的地</string>
     <string name="drawer_content_pager_title_store">店家</string>
     <string name="drawer_content_pager_title_restaurant">餐廳</string>
     <string name="drawer_content_pager_title_theater">劇場</string>
@@ -32,5 +32,6 @@
     <string name="drawer_content_pager_error_msg_no_data">無 POI 資訊</string>
     <string name="action_bar_text_back">上一頁</string>
     <string name="search">搜尋</string>
+    <string name="without_sensor_hint">由於您的手機未具備室內定位所需硬體元件(加速度感測器及陀螺儀)，App無法取得目前準確位置。建議使用具備加速度感測器及陀螺儀的手機，以順利使用各項功能。</string>
 
 </resources>

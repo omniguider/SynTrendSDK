@@ -10,6 +10,7 @@ import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
 import android.support.v4.app.FragmentManager;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 
 import com.omni.syntrendsdk.R;
@@ -74,13 +75,14 @@ public class DialogTools {
 
                 if (activity != null && !activity.isFinishing() && weakContext.get() != null
                         && !mProgressDialog.isShowing()) {
-//                    mProgressDialog.show();
+                    mProgressDialog.show();
                 }
             }
         });
     }
 
     public void dismissProgress(final Activity activity) {
+        Log.e("OKOK","dismissProgress");
         activity.runOnUiThread(new Runnable() {
             @Override
             public void run() {
