@@ -16,6 +16,7 @@ public class FacilityFragment extends Fragment {
 
     public static final String TAG = "fragment_tag_facility";
     private static final String ARG_KEY_FACILITY_TYPE = "arg_key_facility_type";
+    private static final String ARG_KEY_FACILITY_TITLE = "arg_key_facility_title";
 
     //parameter to sdk
     private static final String TYPE_FACILITY = "type_facility";
@@ -100,6 +101,7 @@ public class FacilityFragment extends Fragment {
 
                 Intent intent = new Intent(getActivity(), SynTrendSDKActivity.class);
                 intent.putExtra(ARG_KEY_FACILITY_TYPE, type);
+                intent.putExtra(ARG_KEY_FACILITY_TITLE, categoryEdit);
                 startActivity(intent);
             }
         });

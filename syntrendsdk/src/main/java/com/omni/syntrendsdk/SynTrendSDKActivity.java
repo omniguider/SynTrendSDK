@@ -26,6 +26,7 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
+import android.os.PowerManager;
 import android.os.RemoteException;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
@@ -39,6 +40,7 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.Button;
@@ -135,12 +137,16 @@ public class SynTrendSDKActivity extends BaseActivity implements OnMapReadyCallb
 
     private static final String ARG_KEY_GUIDE_CATEGORY = "arg_key_guide_category";
     private static final String ARG_KEY_FACILITY_TYPE = "arg_key_facility_type";
+    private static final String ARG_KEY_FACILITY_TITLE = "arg_key_facility_title";
     private static final String ARG_KEY_STORE_ROUTE_A = "arg_key_store_route_a";
     private static final String ARG_KEY_STORE_ROUTE_B = "arg_key_store_route_b";
+
+    private static final int MY_PERMISSIONS_REQUEST_READ_CONTACTS = 100;
 
     //    private String type;
     private String guide_category;
     private String facility_type;
+    private String facility_title;
     private String route_custom;
     private String route_recommend;
 
@@ -247,6 +253,7 @@ public class SynTrendSDKActivity extends BaseActivity implements OnMapReadyCallb
     private Button mRestaurantBtn;
     private Button mTheaterBtn;
     private int REQUEST_CODE = 1;
+    private int REQUEST_CODE_BLUETOOTH = 2;
     private LinearLayout categoryLayout;
     private ImageView searchIcon;
     private ImageView menuIcon;
@@ -267,6 +274,7 @@ public class SynTrendSDKActivity extends BaseActivity implements OnMapReadyCallb
     private TextView headerNaviTV;
     public static boolean withAccelerometer = false;
     public static boolean withGyroscope = false;
+    protected PowerManager.WakeLock mWakeLock;
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onEvent(OmniEvent event) {
@@ -333,6 +341,7 @@ public class SynTrendSDKActivity extends BaseActivity implements OnMapReadyCallb
 
         guide_category = getIntent().getStringExtra(ARG_KEY_GUIDE_CATEGORY);
         facility_type = getIntent().getStringExtra(ARG_KEY_FACILITY_TYPE);
+        facility_title = getIntent().getStringExtra(ARG_KEY_FACILITY_TITLE);
         route_custom = getIntent().getStringExtra(ARG_KEY_STORE_ROUTE_A);
         route_recommend = getIntent().getStringExtra(ARG_KEY_STORE_ROUTE_B);
 
@@ -350,7 +359,7 @@ public class SynTrendSDKActivity extends BaseActivity implements OnMapReadyCallb
         } else {
             if (!bluetoothAdapter.isEnabled()) {
                 Intent enableBluetoothIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-                startActivityForResult(enableBluetoothIntent, 77);
+                startActivityForResult(enableBluetoothIntent, REQUEST_CODE_BLUETOOTH);
             }
         }
     }
@@ -579,7 +588,9 @@ public class SynTrendSDKActivity extends BaseActivity implements OnMapReadyCallb
                 });
                 ListView menuListView = popupView.findViewById(R.id.menu_list);
                 menuListView.setDividerHeight(0);
-                menuListView.setAdapter(new menuAdapter(SynTrendSDKActivity.this, menuList));
+                if (menuList != null) {
+                    menuListView.setAdapter(new menuAdapter(SynTrendSDKActivity.this, menuList));
+                }
                 menuListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                     @Override
                     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -671,6 +682,11 @@ public class SynTrendSDKActivity extends BaseActivity implements OnMapReadyCallb
         if (requestCode == REQUEST_CODE) {
             if (resultCode == Activity.RESULT_OK) {
                 updateSelectedPOI((POI) data.getExtras().get(SynTrendText.INTENT_EXTRAS_SELECTED_POI));
+            }
+        }
+        if (requestCode == REQUEST_CODE_BLUETOOTH) {
+            if (resultCode == Activity.RESULT_CANCELED) {
+                finish();
             }
         }
     }
@@ -818,7 +834,7 @@ public class SynTrendSDKActivity extends BaseActivity implements OnMapReadyCallb
     }
 
     private void collapseBottomSheet() {
-        Log.e("OKOK", "collapseBottomSheet"+mNavigationMode);
+        Log.e("OKOK", "collapseBottomSheet" + mNavigationMode);
         if (mNavigationMode == NaviMode.USER_IN_NAVIGATION) {
             return;
         }
@@ -888,6 +904,15 @@ public class SynTrendSDKActivity extends BaseActivity implements OnMapReadyCallb
 
             setNavigationMode(NaviMode.NOT_NAVIGATION);
 
+            if (mWakeLock != null)
+                mWakeLock.release();
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+                }
+            });
+
             mapReadyNavi = false;
 
             mEndPOI = null;
@@ -928,7 +953,8 @@ public class SynTrendSDKActivity extends BaseActivity implements OnMapReadyCallb
             CameraPosition cameraPosition;
 
             if (TextUtils.isEmpty(userCurrentFloorPlanId) ||
-                    (!TextUtils.isEmpty(userCurrentFloorPlanId) && !DataCacheManager.getInstance().isInBuilding(this))) {
+                    (!TextUtils.isEmpty(userCurrentFloorPlanId) && !DataCacheManager.getInstance().isInBuilding(this)) ||
+                    mLastLocation == null) {
 
                 BuildingFloor floor = DataCacheManager.getInstance().getMainGroundFloorPlanId(this);
                 POI entrancePOI = DataCacheManager.getInstance().getEntrancePOI(floor);
@@ -1072,7 +1098,7 @@ public class SynTrendSDKActivity extends BaseActivity implements OnMapReadyCallb
         if (marker.getTag() == null) {
             return;
         }
-        if (!getIntent().getExtras().containsKey(ARG_KEY_STORE_ROUTE_A) ) {
+        if (!getIntent().getExtras().containsKey(ARG_KEY_STORE_ROUTE_A)) {
 //            POI poi = (POI) marker.getTag();
             marker.setIcon(BitmapDescriptorFactory.fromResource(((POI) marker.getTag()).getPOIIconRes(false)));
             collapseBottomSheet();
@@ -1119,13 +1145,13 @@ public class SynTrendSDKActivity extends BaseActivity implements OnMapReadyCallb
                 fetchFloorPlan(userCurrentFloorPlanId, true, DataCacheManager.getInstance().getFloorNumberByPlanId(this, userCurrentFloorPlanId));
                 LatLng current = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
                 addUserMarker(current, mLastLocation);
-                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(current, SynTrendText.MAP_ZOOM_LEVEL));
+                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(current, SynTrendText.MAP_ZOOM_LEVEL));
             }
 
             searchIcon.setVisibility(View.GONE);
             categoryLayout.setVisibility(View.GONE);
             mNaviInfoIconCNIV.setVisibility(View.GONE);
-            mNaviInfoTitleTV.setText(facility_type);
+            mNaviInfoTitleTV.setText(facility_title);
 
             DialogTools.getInstance().showProgress(this);
             Handler handler = new Handler();
@@ -1142,7 +1168,7 @@ public class SynTrendSDKActivity extends BaseActivity implements OnMapReadyCallb
                 fetchFloorPlan(userCurrentFloorPlanId, true, DataCacheManager.getInstance().getFloorNumberByPlanId(this, userCurrentFloorPlanId));
                 LatLng current = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
                 addUserMarker(current, mLastLocation);
-                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(current, SynTrendText.MAP_ZOOM_LEVEL));
+                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(current, SynTrendText.MAP_ZOOM_LEVEL));
             } else {
                 mEventBus.post(new OmniEvent(OmniEvent.TYPE_REQUEST_LAST_LOCATION, ""));
             }
@@ -1152,7 +1178,7 @@ public class SynTrendSDKActivity extends BaseActivity implements OnMapReadyCallb
             searchIcon.setVisibility(View.GONE);
             categoryLayout.setVisibility(View.GONE);
             mNaviInfoIconCNIV.setVisibility(View.GONE);
-            mNaviInfoTitleTV.setText(facility_type);
+            mNaviInfoTitleTV.setText(facility_title);
 
             DialogTools.getInstance().showProgress(this);
             Handler handler = new Handler();
@@ -1173,7 +1199,7 @@ public class SynTrendSDKActivity extends BaseActivity implements OnMapReadyCallb
                     POI entrancePOI = DataCacheManager.getInstance().getEntrancePOI(floor);
                     fetchFloorPlan(floor.getFloorPlanId(), false, floor.getNumber());
 
-                    mMap.animateCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition.Builder(mMap.getCameraPosition())
+                    mMap.moveCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition.Builder(mMap.getCameraPosition())
                             .bearing((float) 15.5)
                             .target(new LatLng(floor.getLatitude(), floor.getLongitude()))
                             .zoom(SynTrendText.MAP_ZOOM_LEVEL)
@@ -1185,13 +1211,13 @@ public class SynTrendSDKActivity extends BaseActivity implements OnMapReadyCallb
                     LatLng current = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
                     addUserMarker(current, mLastLocation);
 //                    mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(current, SynTrendText.MAP_ZOOM_LEVEL));
-                    mMap.animateCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition.Builder(mMap.getCameraPosition())
+                    mMap.moveCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition.Builder(mMap.getCameraPosition())
                             .bearing((float) 15.5)
                             .target(current)
                             .zoom(SynTrendText.MAP_ZOOM_LEVEL)
                             .build()));
                 } else {
-                    mMap.animateCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition.Builder(mMap.getCameraPosition())
+                    mMap.moveCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition.Builder(mMap.getCameraPosition())
                             .bearing((float) 15.5)
                             .target(START_LOCATION)
                             .zoom(SynTrendText.MAP_ZOOM_LEVEL)
@@ -1615,6 +1641,18 @@ public class SynTrendSDKActivity extends BaseActivity implements OnMapReadyCallb
         Log.e("@W@", "startNavigation");
 
         setNavigationMode(NaviMode.USER_IN_NAVIGATION);
+
+        final PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+        assert pm != null;
+        mWakeLock = pm.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK, "WakeLock");
+        mWakeLock.setReferenceCounted(false);
+        mWakeLock.acquire(10 * 60 * 1000L /*10 minutes*/);
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+            }
+        });
 
         mCurrentRouteList = routes;
 
@@ -2386,9 +2424,10 @@ public class SynTrendSDKActivity extends BaseActivity implements OnMapReadyCallb
                 @Override
                 public void onClick(DialogInterface paramDialogInterface, int paramInt) {
                     // TODO Auto-generated method stub
-                    DialogTools.getInstance().showErrorMessage(SynTrendSDKActivity.this,
-                            getString(R.string.error_dialog_title_text_normal),
-                            "沒有開啟位置服務，地圖無法顯示");
+                    finish();
+//                    DialogTools.getInstance().showErrorMessage(SynTrendSDKActivity.this,
+//                            getString(R.string.error_dialog_title_text_normal),
+//                            "沒有開啟位置服務，地圖無法顯示");
                 }
             });
             dialog.show();
@@ -2400,7 +2439,6 @@ public class SynTrendSDKActivity extends BaseActivity implements OnMapReadyCallb
                 ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED ||
                 ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_WIFI_STATE) != PackageManager.PERMISSION_GRANTED ||
                 ActivityCompat.checkSelfPermission(this, Manifest.permission.CHANGE_WIFI_STATE) != PackageManager.PERMISSION_GRANTED ||
-                ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED ||
                 ActivityCompat.checkSelfPermission(this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED ||
                 ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH) != PackageManager.PERMISSION_GRANTED ||
                 ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_ADMIN) != PackageManager.PERMISSION_GRANTED) {
@@ -2410,9 +2448,8 @@ public class SynTrendSDKActivity extends BaseActivity implements OnMapReadyCallb
                             Manifest.permission.ACCESS_COARSE_LOCATION,
                             Manifest.permission.WRITE_EXTERNAL_STORAGE,
                             Manifest.permission.BLUETOOTH,
-                            Manifest.permission.BLUETOOTH_ADMIN,
-                            Manifest.permission.CAMERA},
-                    99);
+                            Manifest.permission.BLUETOOTH_ADMIN},
+                    MY_PERMISSIONS_REQUEST_READ_CONTACTS);
 
         } else {
 //            registerService();
@@ -2436,6 +2473,16 @@ public class SynTrendSDKActivity extends BaseActivity implements OnMapReadyCallb
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
                                            @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        switch (requestCode) {
+            case MY_PERMISSIONS_REQUEST_READ_CONTACTS: {
+                for (int i = 0; i < grantResults.length; i++) {
+                    if (permissions[i].equals(Manifest.permission.ACCESS_FINE_LOCATION) &&
+                            grantResults[i] == PackageManager.PERMISSION_DENIED) {
+                        finish();
+                    }
+                }
+            }
+        }
         registerService();
     }
 

@@ -160,10 +160,11 @@ public class DataCacheManager {
             for (Building building : buildings) {
                 if (building.getDesc().contains("三創生活園區")) {
                     BuildingFloor[] floors = getFloorsByBuildingId(context, building.getId());
-
-                    for (BuildingFloor floor : floors) {
-                        if (floor.getNumber().equals("1")) {
-                            return floor;
+                    if (floors != null) {
+                        for (BuildingFloor floor : floors) {
+                            if (floor.getNumber().equals("1")) {
+                                return floor;
+                            }
                         }
                     }
                 }
@@ -179,11 +180,12 @@ public class DataCacheManager {
             for (Building building : buildings) {
                 if (building.getDesc().contains("三創生活園區")) {
                     BuildingFloor[] floors = getFloorsByBuildingId(context, building.getId());
-
-                    for (BuildingFloor floor : floors) {
-                        for (POI poi : floor.getPois()){
-                            if (poi.getId() == selectedPoiId) {
-                                return floor;
+                    if (floors != null) {
+                        for (BuildingFloor floor : floors) {
+                            for (POI poi : floor.getPois()) {
+                                if (poi.getId() == selectedPoiId) {
+                                    return floor;
+                                }
                             }
                         }
                     }

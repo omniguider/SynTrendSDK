@@ -73,16 +73,22 @@ public class DialogTools {
 
                 WeakReference<Activity> weakContext = new WeakReference<>(activity);
 
-                if (activity != null && !activity.isFinishing() && weakContext.get() != null
-                        && !mProgressDialog.isShowing()) {
-                    mProgressDialog.show();
+                if (activity != null && !activity.isFinishing() && !activity.isDestroyed()
+                        && weakContext.get() != null && !mProgressDialog.isShowing()) {
+                    try {
+                        mProgressDialog.show();
+                    } catch (final IllegalArgumentException e) {
+                        // Handle or log or ignore
+                    } catch (final Exception e) {
+                        // Handle or log or ignore
+                    }
                 }
             }
         });
     }
 
     public void dismissProgress(final Activity activity) {
-        Log.e("OKOK","dismissProgress");
+        Log.e("OKOK", "dismissProgress");
         activity.runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -90,8 +96,14 @@ public class DialogTools {
 
                 if (activity != null && !((Activity) activity).isFinishing() && weakContext.get() != null
                         && mProgressDialog != null && mProgressDialog.isShowing()) {
-                    mProgressDialog.dismiss();
-                    mProgressDialog = null;
+                    try {
+                        mProgressDialog.dismiss();
+                        mProgressDialog = null;
+                    } catch (final IllegalArgumentException e) {
+                        // Handle or log or ignore
+                    } catch (final Exception e) {
+                        // Handle or log or ignore
+                    }
                 }
             }
         });
