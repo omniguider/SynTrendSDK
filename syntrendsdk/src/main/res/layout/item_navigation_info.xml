@@ -3,42 +3,83 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@drawable/solid_top_round_rectangle_olive_green"
-    android:paddingBottom="10dp"
+    android:background="@drawable/solid_top_shadow_rectangle_white"
     android:paddingLeft="@dimen/default_padding"
+    android:paddingTop="10dp"
     android:paddingRight="@dimen/default_padding"
-    android:paddingTop="10dp">
+    android:paddingBottom="10dp">
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <RelativeLayout
-            android:id="@+id/navigation_info_view_rl_btns"
+        <LinearLayout
+            android:id="@+id/navigation_info_view_btns_ll"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:layout_centerVertical="true">
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <ImageView
+                android:id="@+id/navigation_info_view_iv_leave_navi"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:background="@drawable/solid_circle_shadow_white"
+                android:gravity="center"
+                android:padding="12dp"
+                android:src="@mipmap/stop_nav" />
 
             <TextView
                 android:id="@+id/navigation_info_view_tv_leave_navi"
-                android:layout_width="70dp"
-                android:layout_height="36dp"
-                android:background="@mipmap/rectangle_copy_7"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
                 android:gravity="center"
                 android:text="@string/map_page_stop_navi"
-                android:textColor="@color/red_91"
-                android:textSize="@dimen/text_size_big"
-                android:textStyle="bold" />
+                android:textColor="@color/gray_64"
+                android:textSize="14sp" />
 
-        </RelativeLayout>
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/navigation_info_view_tv_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:gravity="center"
+            android:textColor="@color/gray_4d"
+            android:textSize="@dimen/text_size_big"
+            android:textStyle="bold"
+            tools:text="內湖清香農場" />
+
+        <!--<RelativeLayout-->
+        <!--android:id="@+id/navigation_info_view_rl_btns"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_alignParentRight="true"-->
+        <!--android:layout_centerVertical="true">-->
+
+        <!--<TextView-->
+        <!--android:id="@+id/navigation_info_view_tv_leave_navi"-->
+        <!--android:layout_width="70dp"-->
+        <!--android:layout_height="36dp"-->
+        <!--android:background="@mipmap/rectangle_copy_7"-->
+        <!--android:gravity="center"-->
+        <!--android:text="@string/map_page_stop_navi"-->
+        <!--android:textColor="@color/red_91"-->
+        <!--android:textSize="@dimen/text_size_big"-->
+        <!--android:textStyle="bold" />-->
+
+        <!--</RelativeLayout>-->
 
         <LinearLayout
             android:id="@+id/navigation_info_view_ll"
             android:layout_width="match_parent"
             android:layout_height="50dp"
             android:layout_alignParentStart="true"
-            android:layout_toLeftOf="@id/navigation_info_view_rl_btns"
+            android:layout_toLeftOf="@id/navigation_info_view_btns_ll"
             android:orientation="horizontal">
 
             <com.omni.syntrendsdk.view.CircleNetworkImageView
@@ -47,7 +88,8 @@
                 android:layout_height="50dp"
                 android:layout_gravity="center_vertical"
                 android:layout_marginRight="8dp"
-                android:src="@mipmap/syn_poi_information" />
+                android:src="@mipmap/syn_poi_information"
+                android:visibility="gone" />
 
             <LinearLayout
                 android:layout_width="0dp"
@@ -62,14 +104,14 @@
                     android:layout_marginRight="10dp"
                     android:orientation="vertical">
 
-                    <TextView
-                        android:id="@+id/navigation_info_view_tv_title"
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
-                        android:gravity="center_vertical"
-                        android:textColor="@android:color/white"
-                        android:textSize="@dimen/text_size_big"
-                        tools:text="內湖清香農場" />
+                    <!--<TextView-->
+                    <!--android:id="@+id/navigation_info_view_tv_title"-->
+                    <!--android:layout_width="wrap_content"-->
+                    <!--android:layout_height="match_parent"-->
+                    <!--android:gravity="center_vertical"-->
+                    <!--android:textColor="@android:color/white"-->
+                    <!--android:textSize="@dimen/text_size_big"-->
+                    <!--tools:text="內湖清香農場" />-->
 
                 </LinearLayout>
             </LinearLayout>

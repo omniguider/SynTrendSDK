@@ -5,8 +5,9 @@
     <string name="activity_main_title_store">逛店趣</string>
     <string name="activity_main_title_guide">直達趣</string>
     <string name="activity_main_title_facility">暖心趣</string>
-    <string name="map_page_start_navi">導 航</string>
-    <string name="map_page_stop_navi">結 束</string>
+    <string name="map_page_check_list">查看列表</string>
+    <string name="map_page_start_navi">開始導航</string>
+    <string name="map_page_stop_navi">停止導航</string>
     <string name="map_page_instructions_current_floor">所在樓層</string>
     <string name="map_page_instructions_destination">導引目的地</string>
     <string name="map_page_instructions_user_location">重新定位</string>

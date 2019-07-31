@@ -87,8 +87,37 @@ public class DialogTools {
         });
     }
 
+    public void showLocationProgress(final Activity activity) {
+        Log.e("OKOK","showLocationProgress");
+        activity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if (mProgressDialog == null) {
+                    mProgressDialog = new ProgressDialog(activity);
+                    mProgressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+                    mProgressDialog.setCanceledOnTouchOutside(false);
+                    mProgressDialog.setCancelable(false);
+                    mProgressDialog.setMessage("定位中");
+                }
+
+                WeakReference<Activity> weakContext = new WeakReference<>(activity);
+                Log.e("OKOK","mProgressDialog.isShowing()"+mProgressDialog.isShowing());
+                if (activity != null && !activity.isFinishing() && !activity.isDestroyed()
+                        && weakContext.get() != null && !mProgressDialog.isShowing()) {
+                    try {
+                        mProgressDialog.show();
+                    } catch (final IllegalArgumentException e) {
+                        // Handle or log or ignore
+                    } catch (final Exception e) {
+                        // Handle or log or ignore
+                    }
+                }
+            }
+        });
+    }
+
     public void dismissProgress(final Activity activity) {
-        Log.e("OKOK", "dismissProgress");
+        Log.e("OKOK", "mProgressDialog dismissProgress");
         activity.runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -98,12 +127,12 @@ public class DialogTools {
                         && mProgressDialog != null && mProgressDialog.isShowing()) {
                     try {
                         mProgressDialog.dismiss();
-                        mProgressDialog = null;
                     } catch (final IllegalArgumentException e) {
                         // Handle or log or ignore
                     } catch (final Exception e) {
                         // Handle or log or ignore
                     }
+                    mProgressDialog = null;
                 }
             }
         });

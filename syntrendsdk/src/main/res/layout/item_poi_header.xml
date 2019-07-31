@@ -4,16 +4,17 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:paddingBottom="10dp"
     android:paddingLeft="@dimen/default_padding"
+    android:paddingTop="10dp"
     android:paddingRight="@dimen/default_padding"
-    android:paddingTop="10dp">
+    android:paddingBottom="10dp">
 
     <ImageView
         android:id="@+id/item_poi_header_iv_arrow"
         android:layout_width="50dp"
         android:layout_height="5dp"
         android:layout_centerHorizontal="true"
+        android:visibility="gone"
         app:srcCompat="@drawable/solid_round_rectangle_white"
         tools:ignore="VectorDrawableCompat" />
 
@@ -28,64 +29,115 @@
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"
-            android:orientation="horizontal">
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <ImageView
+                android:id="@+id/poi_info_header_view_iv_navi"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:background="@drawable/solid_circle_shadow_white"
+                android:gravity="center"
+                android:padding="12dp"
+                android:src="@mipmap/start_nav" />
 
             <TextView
                 android:id="@+id/poi_info_header_view_tv_navi"
-                android:layout_width="70dp"
-                android:layout_height="36dp"
-                android:background="@drawable/solid_round_rectangle_navi_blue"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
                 android:gravity="center"
                 android:text="@string/map_page_start_navi"
-                android:textColor="@android:color/white"
-                android:textSize="@dimen/text_size_big"
-                android:textStyle="bold" />
+                android:textColor="@color/gray_64"
+                android:textSize="14sp" />
 
         </LinearLayout>
 
         <LinearLayout
-            android:id="@+id/poi_info_header_view_ll"
-            android:layout_width="match_parent"
+            android:id="@+id/poi_info_header_view_list_ll"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentStart="true"
-            android:layout_toLeftOf="@id/poi_info_header_view_rl_btns"
-            android:orientation="horizontal">
+            android:layout_centerVertical="true"
+            android:gravity="center"
+            android:orientation="vertical">
 
-            <com.omni.syntrendsdk.view.CircleNetworkImageView
-                android:id="@+id/poi_info_header_view_cniv"
+            <ImageView
+                android:id="@+id/poi_info_header_view_iv_list"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
-                android:layout_gravity="center_vertical"
-                android:layout_marginRight="8dp"
-                android:src="@mipmap/syn_poi_information" />
+                android:background="@drawable/solid_circle_shadow_white"
+                android:gravity="center"
+                android:padding="12dp"
+                android:src="@mipmap/store_list" />
 
-            <LinearLayout
-                android:layout_width="157dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:orientation="horizontal">
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:layout_marginLeft="10dp"
-                    android:layout_marginRight="10dp"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:id="@+id/poi_info_header_view_tv_title"
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
-                        android:gravity="center_vertical"
-                        android:textColor="@android:color/white"
-                        android:textSize="@dimen/text_size_big"
-                        tools:text="內湖清香農場"
-                        tools:textColor="@android:color/black" />
-
-                </LinearLayout>
-            </LinearLayout>
+            <TextView
+                android:id="@+id/poi_info_header_view_tv_list"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                android:layout_marginTop="2dp"
+                android:gravity="center"
+                android:text="@string/map_page_check_list"
+                android:textColor="@color/gray_64"
+                android:textSize="14sp" />
 
         </LinearLayout>
+
+        <TextView
+            android:id="@+id/poi_info_header_view_tv_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:layout_centerInParent="true"
+            android:textColor="@color/gray_4d"
+            android:textSize="@dimen/text_size_big"
+            android:textStyle="bold"
+            tools:text="內湖清香農場" />
+
+        <!--<LinearLayout-->
+            <!--android:id="@+id/poi_info_header_view_ll"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_alignParentStart="true"-->
+            <!--android:layout_toLeftOf="@id/poi_info_header_view_rl_btns"-->
+            <!--android:orientation="horizontal">-->
+
+            <!--<com.omni.syntrendsdk.view.CircleNetworkImageView-->
+                <!--android:id="@+id/poi_info_header_view_cniv"-->
+                <!--android:layout_width="50dp"-->
+                <!--android:layout_height="50dp"-->
+                <!--android:layout_gravity="center_vertical"-->
+                <!--android:layout_marginRight="8dp"-->
+                <!--android:src="@mipmap/syn_poi_information" />-->
+
+            <!--<LinearLayout-->
+                <!--android:layout_width="157dp"-->
+                <!--android:layout_height="match_parent"-->
+                <!--android:layout_weight="1"-->
+                <!--android:orientation="horizontal">-->
+
+                <!--<LinearLayout-->
+                    <!--android:layout_width="wrap_content"-->
+                    <!--android:layout_height="match_parent"-->
+                    <!--android:layout_marginLeft="10dp"-->
+                    <!--android:layout_marginRight="10dp"-->
+                    <!--android:orientation="vertical">-->
+
+                    <!--<TextView-->
+                        <!--android:id="@+id/poi_info_header_view_tv_title"-->
+                        <!--android:layout_width="wrap_content"-->
+                        <!--android:layout_height="match_parent"-->
+                        <!--android:gravity="center_vertical"-->
+                        <!--android:textColor="@color/gray_4d"-->
+                        <!--android:textSize="@dimen/text_size_big"-->
+                        <!--android:textStyle="bold"-->
+                        <!--tools:text="內湖清香農場" />-->
+
+                <!--</LinearLayout>-->
+            <!--</LinearLayout>-->
+
+        <!--</LinearLayout>-->
 
     </RelativeLayout>
 

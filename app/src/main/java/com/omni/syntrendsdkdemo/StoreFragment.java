@@ -21,6 +21,8 @@ public class StoreFragment extends Fragment {
     public static final String TAG = "fragment_tag_store";
     private static final String ARG_KEY_STORE_ROUTE_A = "arg_key_store_route_a";
     private static final String ARG_KEY_STORE_ROUTE_B = "arg_key_store_route_b";
+    private static final String ARG_KEY_AUTO_HEADING = "arg_key_auto_heading";
+    private static final String ARG_KEY_NAVIGATE_DIRECT = "arg_key_navigate_direct";
 
     private EditText editTextCustom;
     private EditText editTextRecommend;
@@ -54,6 +56,8 @@ public class StoreFragment extends Fragment {
                     Intent intent = new Intent(getActivity(), SynTrendSDKActivity.class);
                     intent.putExtra(ARG_KEY_STORE_ROUTE_A, custom);
                     intent.putExtra(ARG_KEY_STORE_ROUTE_B, recommend);
+                    intent.putExtra(ARG_KEY_AUTO_HEADING, true);
+                    intent.putExtra(ARG_KEY_NAVIGATE_DIRECT, false);
                     startActivity(intent);
                 } else {
                     AlertDialog.Builder builder = new AlertDialog.Builder(getActivity())
@@ -89,6 +93,8 @@ public class StoreFragment extends Fragment {
                                 Intent intent = new Intent(getActivity(), SynTrendSDKActivity.class);
                                 intent.putExtra(ARG_KEY_STORE_ROUTE_A, customPreference);
                                 intent.putExtra(ARG_KEY_STORE_ROUTE_B, recommendPreference);
+                                intent.putExtra(ARG_KEY_AUTO_HEADING, true);
+                                intent.putExtra(ARG_KEY_NAVIGATE_DIRECT, false);
                                 startActivity(intent);
                             }
                         })

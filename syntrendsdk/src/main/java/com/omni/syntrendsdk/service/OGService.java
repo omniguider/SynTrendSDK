@@ -24,7 +24,7 @@ import com.indooratlas.android.sdk.IALocationListener;
 import com.indooratlas.android.sdk.IALocationManager;
 import com.indooratlas.android.sdk.IALocationRequest;
 import com.indooratlas.android.sdk.IARegion;
-import com.indooratlas.android.sdk.resources.IAResourceManager;
+//import com.indooratlas.android.sdk.resources.IAResourceManager;
 import com.omni.syntrendsdk.manager.DataCacheManager;
 import com.omni.syntrendsdk.module.OmniEvent;
 import com.omni.syntrendsdk.module.UserCurrentLocation;
@@ -52,7 +52,7 @@ public class OGService implements IARegion.Listener,
 
     private Activity mActivity;
     private IALocationManager mIALocationManager;
-    private IAResourceManager mIAResourceManager;
+//    private IAResourceManager mIAResourceManager;
     private LocationRequest mLocationRequest;
     private GoogleApiClient mGoogleApiClient;
     private boolean mIsIndoor = false;
@@ -160,9 +160,9 @@ public class OGService implements IARegion.Listener,
             mIALocationManager.unregisterRegionListener(this);
         }
         mIALocationManager.registerRegionListener(this);
-        if (mIAResourceManager == null) {
-            mIAResourceManager = IAResourceManager.create(mActivity);
-        }
+//        if (mIAResourceManager == null) {
+//            mIAResourceManager = IAResourceManager.create(mActivity);
+//        }
     }
 
     public void stopService() {

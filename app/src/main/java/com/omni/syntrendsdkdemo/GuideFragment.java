@@ -16,6 +16,7 @@ public class GuideFragment extends Fragment {
 
     public static final String TAG = "fragment_tag_guide";
     private static final String ARG_KEY_GUIDE_CATEGORY = "arg_key_guide_category";
+    private static final String ARG_KEY_AUTO_HEADING = "arg_key_auto_heading";
 
     //parameter to sdk
     private static final String TYPE_GUIDE = "type_guide";
@@ -73,6 +74,7 @@ public class GuideFragment extends Fragment {
 
                 Intent intent = new Intent(getActivity(), SynTrendSDKActivity.class);
                 intent.putExtra(ARG_KEY_GUIDE_CATEGORY, category);
+                intent.putExtra(ARG_KEY_AUTO_HEADING, true);
                 startActivity(intent);
             }
         });

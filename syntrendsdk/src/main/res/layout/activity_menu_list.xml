@@ -1,17 +1,41 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:orientation="vertical">
+    android:layout_height="wrap_content">
 
-    <ListView
-        android:id="@+id/menu_list"
-        android:layout_width="200dp"
-        android:layout_height="match_parent"
-        android:layout_marginEnd="@dimen/default_padding"
-        android:background="@color/gray_62"
-        android:paddingBottom="6dp"
-        android:paddingTop="6dp">
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="25dp">
 
-    </ListView>
+        <ListView
+            android:id="@+id/menu_list"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:background="@drawable/solid_round_rectangle_gray_ed"
+            android:paddingTop="36dp"
+            android:paddingBottom="6dp"
+            android:scrollbars="vertical">
 
-</LinearLayout>
+        </ListView>
+
+    </FrameLayout>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@android:color/transparent">
+
+        <ImageView
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_gravity="center"
+            android:background="@drawable/solid_circle_shadow_white"
+            android:paddingStart="10dp"
+            android:paddingTop="10dp"
+            android:paddingEnd="10dp"
+            android:paddingBottom="12dp"
+            android:src="@mipmap/store_list" />
+    </FrameLayout>
+
+</FrameLayout>
