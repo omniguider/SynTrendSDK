@@ -2349,31 +2349,31 @@ public class SynTrendSDKActivity extends BaseActivity implements OnMapReadyCallb
 //                mNavigationMarker.setVisible(DataCacheManager.getInstance().getCurrentShowFloor().getFloorLevel()
 //                        .equals(DataCacheManager.getInstance().getUserCurrentFloorLevel(this)));
 //            }
-runOnUiThread(new Runnable() {
-    @Override
-    public void run() {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
 
-                    int zoomLevel = (int) mMap.getCameraPosition().zoom;
-                    CameraPosition cameraPosition;
-                    if (autoHeading) {
-                        cameraPosition = new CameraPosition.Builder()
+                            int zoomLevel = (int) mMap.getCameraPosition().zoom;
+                            CameraPosition cameraPosition;
+                            if (autoHeading) {
+                                cameraPosition = new CameraPosition.Builder()
 //                    .target(pointOnRoute)
-                                .target(userPosition)
-                                .zoom(SynTrendText.MAP_ZOOM_LEVEL)
+                                        .target(userPosition)
+                                        .zoom(SynTrendText.MAP_ZOOM_LEVEL)
 //                    .zoom((cameraMoveTimes < 5 && zoomLevel < NLPIText.MAP_ZOOM_LEVEL) ? NLPIText.MAP_ZOOM_LEVEL : zoomLevel)
-                                .bearing(mUserMarker.getRotation())
+                                        .bearing(mUserMarker.getRotation())
 //                    .bearing((float) heading)
 //                    .tilt(20)
-                                .build();
-                    } else {
-                        cameraPosition = new CameraPosition.Builder()
-                                .target(userPosition)
-                                .zoom(SynTrendText.MAP_ZOOM_LEVEL)
-                                .build();
-                    }
+                                        .build();
+                            } else {
+                                cameraPosition = new CameraPosition.Builder()
+                                        .target(userPosition)
+                                        .zoom(SynTrendText.MAP_ZOOM_LEVEL)
+                                        .build();
+                            }
 
-                    mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
-                    cameraMoveTimes++;
+                            mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+                            cameraMoveTimes++;
 
 //            if (startRecordFlag) {
 //                String distanceBetween = Tools.getInstance().getDistanceStr(pointOnRoute.latitude, pointOnRoute.longitude, userPosition.latitude, userPosition.longitude);
@@ -2382,61 +2382,61 @@ runOnUiThread(new Runnable() {
 //                        distanceBetween});
 //            }
 
-                    if (mCurrentRouteList != null) {
-                        Log.e("OKOK", "mCurrentRouteList != null");
-                        int lastOfArr = mCurrentRouteList.size() - 1;
-                        double routeLat = Double.parseDouble(mCurrentRouteList.get(lastOfArr).getLatitude());
-                        double routeLon = Double.parseDouble(mCurrentRouteList.get(lastOfArr).getLongitude());
-                        float userDisToTarget = getDistance(pointOnRoute, routeLat, routeLon);
-                        Log.e("OKOK", "userDisToTarget" + userDisToTarget);
-                        if (userDisToTarget <= 5 && userDisToTarget > 0.5 &&
-                                mCurrentRouteList.get(lastOfArr).getFloorNumber()
-                                        .equals(DataCacheManager.getInstance().getUserCurrentFloorLevel(SynTrendSDKActivity.this))) {
-                            if (getIntent().getExtras().containsKey(ARG_KEY_STORE_ROUTE_A)) {
-                                if (NavigationRoutePOIListA.size() != 0) {
-                                    if (NavigationRoutePOIListA.get(0).getStoreID().equals(NavigationRoutePOIListAll.get(NavigationRoutePOIListAllPosition).getStoreID())) {
-                                        NavigationRoutePOIListA.remove(0);
-                                        route_custom = "";
-                                        for (NavigationRoutePOI poi : NavigationRoutePOIListA) {
-                                            route_custom = route_custom + poi.getStoreID() + ",";
-                                        }
-                                        PreferencesTools.getInstance().saveProperty(SynTrendSDKActivity.this, PreferencesTools.KEY_STORE_ROUTE_A, route_custom);
-                                    }
-                                }
-                                if (NavigationRoutePOIListB.size() != 0) {
-                                    if (NavigationRoutePOIListB.get(0).getStoreID().equals(NavigationRoutePOIListAll.get(NavigationRoutePOIListAllPosition).getStoreID())) {
-                                        NavigationRoutePOIListB.remove(0);
-                                        route_recommend = "";
-                                        for (NavigationRoutePOI poi : NavigationRoutePOIListB) {
-                                            route_recommend = route_recommend + poi.getStoreID() + ",";
-                                        }
-                                        PreferencesTools.getInstance().saveProperty(SynTrendSDKActivity.this, PreferencesTools.KEY_STORE_ROUTE_B, route_recommend);
-                                    }
-                                }
-                                Log.e("OKOK", "route_custom" + route_custom);
-                                Log.e("OKOK", "route_recommend" + route_recommend);
-                            }
-
-                            if (getIntent().getExtras().containsKey(ARG_KEY_STORE_ROUTE_A) && NavigationRoutePOIListAllPosition >= NavigationRoutePOIListAll.size() - 1) {
-                                AlertDialog.Builder builder = new AlertDialog.Builder(SynTrendSDKActivity.this)
-                                        .setTitle(R.string.dialog_title_hint)
-                                        .setMessage(R.string.dialog_message_arrive_destination)
-                                        .setPositiveButton(R.string.dialog_button_ok_text, new DialogInterface.OnClickListener() {
-                                            @Override
-                                            public void onClick(DialogInterface dialogInterface, int i) {
-                                                finish();
+                            if (mCurrentRouteList != null) {
+                                Log.e("OKOK", "mCurrentRouteList != null");
+                                int lastOfArr = mCurrentRouteList.size() - 1;
+                                double routeLat = Double.parseDouble(mCurrentRouteList.get(lastOfArr).getLatitude());
+                                double routeLon = Double.parseDouble(mCurrentRouteList.get(lastOfArr).getLongitude());
+                                float userDisToTarget = getDistance(pointOnRoute, routeLat, routeLon);
+                                Log.e("OKOK", "userDisToTarget" + userDisToTarget);
+                                if (userDisToTarget <= 5 && userDisToTarget > 0.5 &&
+                                        mCurrentRouteList.get(lastOfArr).getFloorNumber()
+                                                .equals(DataCacheManager.getInstance().getUserCurrentFloorLevel(SynTrendSDKActivity.this))) {
+                                    if (getIntent().getExtras().containsKey(ARG_KEY_STORE_ROUTE_A)) {
+                                        if (NavigationRoutePOIListA.size() != 0) {
+                                            if (NavigationRoutePOIListA.get(0).getStoreID().equals(NavigationRoutePOIListAll.get(NavigationRoutePOIListAllPosition).getStoreID())) {
+                                                NavigationRoutePOIListA.remove(0);
+                                                route_custom = "";
+                                                for (NavigationRoutePOI poi : NavigationRoutePOIListA) {
+                                                    route_custom = route_custom + poi.getStoreID() + ",";
+                                                }
+                                                PreferencesTools.getInstance().saveProperty(SynTrendSDKActivity.this, PreferencesTools.KEY_STORE_ROUTE_A, route_custom);
                                             }
-                                        });
-                                builder.create().show();
-                            } else {
-                                DialogTools.getInstance().showErrorMessage(SynTrendSDKActivity.this,
-                                        R.string.dialog_title_hint,
-                                        R.string.dialog_message_arrive_destination);
-                            }
-                            NavigationRoutePOIListAllPosition++;
-                            MarkerListPosition++;
-                            leaveNavigation();
-                        }
+                                        }
+                                        if (NavigationRoutePOIListB.size() != 0) {
+                                            if (NavigationRoutePOIListB.get(0).getStoreID().equals(NavigationRoutePOIListAll.get(NavigationRoutePOIListAllPosition).getStoreID())) {
+                                                NavigationRoutePOIListB.remove(0);
+                                                route_recommend = "";
+                                                for (NavigationRoutePOI poi : NavigationRoutePOIListB) {
+                                                    route_recommend = route_recommend + poi.getStoreID() + ",";
+                                                }
+                                                PreferencesTools.getInstance().saveProperty(SynTrendSDKActivity.this, PreferencesTools.KEY_STORE_ROUTE_B, route_recommend);
+                                            }
+                                        }
+                                        Log.e("OKOK", "route_custom" + route_custom);
+                                        Log.e("OKOK", "route_recommend" + route_recommend);
+                                    }
+
+                                    if (getIntent().getExtras().containsKey(ARG_KEY_STORE_ROUTE_A) && NavigationRoutePOIListAllPosition >= NavigationRoutePOIListAll.size() - 1) {
+                                        AlertDialog.Builder builder = new AlertDialog.Builder(SynTrendSDKActivity.this)
+                                                .setTitle(R.string.dialog_title_hint)
+                                                .setMessage(R.string.dialog_message_arrive_destination)
+                                                .setPositiveButton(R.string.dialog_button_ok_text, new DialogInterface.OnClickListener() {
+                                                    @Override
+                                                    public void onClick(DialogInterface dialogInterface, int i) {
+                                                        finish();
+                                                    }
+                                                });
+                                        builder.create().show();
+                                    } else {
+                                        DialogTools.getInstance().showErrorMessage(SynTrendSDKActivity.this,
+                                                R.string.dialog_title_hint,
+                                                R.string.dialog_message_arrive_destination);
+                                    }
+                                    NavigationRoutePOIListAllPosition++;
+                                    MarkerListPosition++;
+                                    leaveNavigation();
+                                }
 //                if (getArguments().containsKey(ARG_KEY_BOOK_NAVIGATION_ROUTE) && userDisToTarget <= 3) {
 //                    String bookName = getArguments().getString(ARG_KEY_BOOK_NAME);
 //                    BookLocationInfo locationInfo = (BookLocationInfo) getArguments().getSerializable(ARG_KEY_BOOK_LOCATION_INFO);
@@ -2447,9 +2447,9 @@ runOnUiThread(new Runnable() {
 //                            navigationRoute.getBookshelfMsg()),
 //                            BookshelfFragment.TAG);
 //                }
-                    }
-    }
-});
+                            }
+                        }
+                    });
                 }
             }).start();
         }
@@ -2727,6 +2727,9 @@ runOnUiThread(new Runnable() {
             mEventBus.post(new OmniEvent(OmniEvent.TYPE_REQUEST_LAST_LOCATION, ""));
 
         } else {
+
+            mEventBus.post(new OmniEvent(OmniEvent.TYPE_REQUEST_LAST_LOCATION, ""));
+
             final String floorPlanId = DataCacheManager.getInstance().getUserCurrentFloorPlanId();
             String buildingId = DataCacheManager.getInstance().getBuildingIdByFloorPlanId(this, floorPlanId);
             String floorLevel = DataCacheManager.getInstance().getUserCurrentFloorLevel(this);
