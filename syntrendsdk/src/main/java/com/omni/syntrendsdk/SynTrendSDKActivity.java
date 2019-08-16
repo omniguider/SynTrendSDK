@@ -287,6 +287,13 @@ public class SynTrendSDKActivity extends BaseActivity implements OnMapReadyCallb
     public static boolean withGyroscope = false;
     protected PowerManager.WakeLock mWakeLock;
 
+    private LatLng userPosition = null;
+    private LatLng previousPoint = null;
+    private LatLng closestPoint = null;
+    private double closestDistance = -1;
+    private double heading = -1;
+    private double distanceLine;
+    private double distanceSegment;
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onEvent(OmniEvent event) {
@@ -551,6 +558,7 @@ public class SynTrendSDKActivity extends BaseActivity implements OnMapReadyCallb
 
         FrameLayout fl = (FrameLayout) mPOIInfoLayout.getParent();
         mBottomSheetBehavior = BottomSheetBehavior.from(fl);
+        mBottomSheetBehavior.setHideable(false);
         mBottomSheetBehavior.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
             @Override
             public void onStateChanged(@NonNull View bottomSheet, int newState) {
@@ -1117,9 +1125,9 @@ public class SynTrendSDKActivity extends BaseActivity implements OnMapReadyCallb
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                DialogTools.getInstance().showErrorMessage(SynTrendSDKActivity.this,
-                                        R.string.error_dialog_title_text_normal,
-                                        errorMsg);
+//                                DialogTools.getInstance().showErrorMessage(SynTrendSDKActivity.this,
+//                                        R.string.error_dialog_title_text_normal,
+//                                        errorMsg);
                             }
                         });
                     }
@@ -1193,7 +1201,9 @@ public class SynTrendSDKActivity extends BaseActivity implements OnMapReadyCallb
                 .zoom(SynTrendText.MAP_ZOOM_LEVEL)
                 .build()));
         groundFloor = DataCacheManager.getInstance().getMainGroundFloorPlanId(this);
-        fetchFloorPlan(groundFloor.getFloorPlanId(), false, "1");
+        if (groundFloor != null) {
+            fetchFloorPlan(groundFloor.getFloorPlanId(), false, "1");
+        }
 
         String userCurrentFloorPlanId = DataCacheManager.getInstance().getUserCurrentFloorPlanId();
         Log.e("OKOK", "userCurrentFloorPlanId" + userCurrentFloorPlanId);
@@ -1680,13 +1690,17 @@ public class SynTrendSDKActivity extends BaseActivity implements OnMapReadyCallb
 //            }
 //            PreferencesTools.getInstance().saveProperty(this, PreferencesTools.KEY_STORE_ROUTE_B, route_recommend);
 //        }
-
+        Log.e("OKOK", "NavigationRoutePOIListAllPosition" + NavigationRoutePOIListAllPosition);
+        Log.e("OKOK", "NavigationRoutePOIListAll.size()" + NavigationRoutePOIListAll.size());
         if (NavigationRoutePOIListAll.size() != 0 && NavigationRoutePOIListAllPosition < NavigationRoutePOIListAll.size()) {
+            Log.e("OKOK", "NavigationRoutePOIListAllPosition111111");
             EndPOIId = NavigationRoutePOIListAll.get(NavigationRoutePOIListAllPosition).getID();
             mNaviInfoIconCNIV.setVisibility(View.VISIBLE);
             NetworkManager.getInstance().setNetworkImage(this, mNaviInfoIconCNIV, "", R.mipmap.syn_poi_store, R.mipmap.syn_poi_information);
             mNaviInfoTitleTV.setText(NavigationRoutePOIListAll.get(NavigationRoutePOIListAllPosition).getName());
             mPOIInfoContentTV.setText(NavigationRoutePOIListAll.get(NavigationRoutePOIListAllPosition).getDesc());
+            Log.e("OKOK", "NavigationRoutePOIListAll.get(NavigationRoutePOIListAllPosition).getDesc()" +
+                    NavigationRoutePOIListAll.get(0).getDesc());
             NetworkManager.getInstance().setNetworkImage(this, mPOIInfoPicNIV,
                     NavigationRoutePOIListAll.get(NavigationRoutePOIListAllPosition).getLogo());
 
@@ -1960,7 +1974,7 @@ public class SynTrendSDKActivity extends BaseActivity implements OnMapReadyCallb
 //                    (getArguments().containsKey(ARG_KEY_BOOK_NAVIGATION_ROUTE) && !getArguments().getBoolean(ARG_KEY_NAVIGATION_IS_USER_IN_BUILDING))) {
 //                return;
 //            }
-            List<LatLng> pointList = DataCacheManager.getInstance().getUserCurrentFloorRoutePointList(this);
+            final List<LatLng> pointList = DataCacheManager.getInstance().getUserCurrentFloorRoutePointList(this);
             Log.e("@W@", "pointList == null ? " + (pointList == null));
             if (pointList != null) {
 //                if (getArguments().containsKey(ARG_KEY_BOOK_NAVIGATION_ROUTE)) {
@@ -2251,70 +2265,73 @@ public class SynTrendSDKActivity extends BaseActivity implements OnMapReadyCallb
         }
     }
 
-    private void moveCameraByUserLocation(List<LatLng> pointList) {
+    private void moveCameraByUserLocation(final List<LatLng> pointList) {
         Log.e("OKOK", "moveCameraByUserLocation");
         if (pointList != null && mUserMarker != null) {
-            LatLng userPosition = mUserMarker.getPosition();
-            LatLng previousPoint = null;
-            LatLng closestPoint = null;
-            double closestDistance = -1;
-            double heading = -1;
+            userPosition = mUserMarker.getPosition();
+            previousPoint = null;
+            closestPoint = null;
+            closestDistance = -1;
+            heading = -1;
 
-            double distanceLine;
-            double distanceSegment;
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    Log.e("OKOK", " new Thread");
+                    for (LatLng point : pointList) {
 
-            for (LatLng point : pointList) {
+                        if (previousPoint != null) {
+                            double r_numerator = (userPosition.longitude - previousPoint.longitude) * (point.longitude - previousPoint.longitude) +
+                                    (userPosition.latitude - previousPoint.latitude) * (point.latitude - previousPoint.latitude);
+                            double r_denominator = (point.longitude - previousPoint.longitude) * (point.longitude - previousPoint.longitude) +
+                                    (point.latitude - previousPoint.latitude) * (point.latitude - previousPoint.latitude);
+                            double r = r_numerator / r_denominator;
 
-                if (previousPoint != null) {
-                    double r_numerator = (userPosition.longitude - previousPoint.longitude) * (point.longitude - previousPoint.longitude) +
-                            (userPosition.latitude - previousPoint.latitude) * (point.latitude - previousPoint.latitude);
-                    double r_denominator = (point.longitude - previousPoint.longitude) * (point.longitude - previousPoint.longitude) +
-                            (point.latitude - previousPoint.latitude) * (point.latitude - previousPoint.latitude);
-                    double r = r_numerator / r_denominator;
+                            double px = previousPoint.longitude + r * (point.longitude - previousPoint.longitude);
+                            double py = previousPoint.latitude + r * (point.latitude - previousPoint.latitude);
 
-                    double px = previousPoint.longitude + r * (point.longitude - previousPoint.longitude);
-                    double py = previousPoint.latitude + r * (point.latitude - previousPoint.latitude);
+                            double s = ((previousPoint.latitude - userPosition.latitude) * (point.longitude - previousPoint.longitude) -
+                                    (previousPoint.longitude - userPosition.longitude) * (point.latitude - previousPoint.latitude)) / r_denominator;
 
-                    double s = ((previousPoint.latitude - userPosition.latitude) * (point.longitude - previousPoint.longitude) -
-                            (previousPoint.longitude - userPosition.longitude) * (point.latitude - previousPoint.latitude)) / r_denominator;
+                            distanceLine = Math.abs(s) * Math.sqrt(r_denominator);
 
-                    distanceLine = Math.abs(s) * Math.sqrt(r_denominator);
+                            double xx = px;
+                            double yy = py;
 
-                    double xx = px;
-                    double yy = py;
+                            if ((r >= 0) && (r <= 1)) {
+                                distanceSegment = distanceLine;
+                            } else {
 
-                    if ((r >= 0) && (r <= 1)) {
-                        distanceSegment = distanceLine;
-                    } else {
+                                double dist1 = (userPosition.longitude - previousPoint.longitude) * (userPosition.longitude - previousPoint.longitude) +
+                                        (userPosition.latitude - previousPoint.latitude) * (userPosition.latitude - previousPoint.latitude);
+                                double dist2 = (userPosition.longitude - point.longitude) * (userPosition.longitude - point.longitude) +
+                                        (userPosition.latitude - point.latitude) * (userPosition.latitude - point.latitude);
+                                if (dist1 < dist2) {
+                                    xx = previousPoint.longitude;
+                                    yy = previousPoint.latitude;
+                                    distanceSegment = Math.sqrt(dist1);
+                                } else {
+                                    xx = point.longitude;
+                                    yy = point.latitude;
+                                    distanceSegment = Math.sqrt(dist2);
+                                }
+                            }
 
-                        double dist1 = (userPosition.longitude - previousPoint.longitude) * (userPosition.longitude - previousPoint.longitude) +
-                                (userPosition.latitude - previousPoint.latitude) * (userPosition.latitude - previousPoint.latitude);
-                        double dist2 = (userPosition.longitude - point.longitude) * (userPosition.longitude - point.longitude) +
-                                (userPosition.latitude - point.latitude) * (userPosition.latitude - point.latitude);
-                        if (dist1 < dist2) {
-                            xx = previousPoint.longitude;
-                            yy = previousPoint.latitude;
-                            distanceSegment = Math.sqrt(dist1);
-                        } else {
-                            xx = point.longitude;
-                            yy = point.latitude;
-                            distanceSegment = Math.sqrt(dist2);
+                            if (closestDistance == -1 || closestDistance > distanceSegment) {
+                                closestDistance = distanceSegment;
+                                closestPoint = new LatLng(yy, xx);
+                                heading = SphericalUtil.computeHeading(previousPoint, point);
+                            }
                         }
+                        previousPoint = point;
                     }
 
-                    if (closestDistance == -1 || closestDistance > distanceSegment) {
-                        closestDistance = distanceSegment;
-                        closestPoint = new LatLng(yy, xx);
-                        heading = SphericalUtil.computeHeading(previousPoint, point);
+                    if (closestPoint == null) {
+                        Log.e("OKOK", " closestPoint == null");
+                        return;
                     }
-                }
-                previousPoint = point;
-            }
 
-            if (closestPoint == null)
-                return;
-
-            LatLng pointOnRoute = SphericalUtil.computeOffset(closestPoint, closestDistance, heading);
+                    final LatLng pointOnRoute = SphericalUtil.computeOffset(closestPoint, closestDistance, heading);
 
 //            if (mNavigationMarker == null) {
 //                mNavigationMarker = mMap.addMarker(new MarkerOptions()
@@ -2332,91 +2349,94 @@ public class SynTrendSDKActivity extends BaseActivity implements OnMapReadyCallb
 //                mNavigationMarker.setVisible(DataCacheManager.getInstance().getCurrentShowFloor().getFloorLevel()
 //                        .equals(DataCacheManager.getInstance().getUserCurrentFloorLevel(this)));
 //            }
+runOnUiThread(new Runnable() {
+    @Override
+    public void run() {
 
-            int zoomLevel = (int) mMap.getCameraPosition().zoom;
-            CameraPosition cameraPosition;
-            if (autoHeading) {
-                cameraPosition = new CameraPosition.Builder()
+                    int zoomLevel = (int) mMap.getCameraPosition().zoom;
+                    CameraPosition cameraPosition;
+                    if (autoHeading) {
+                        cameraPosition = new CameraPosition.Builder()
 //                    .target(pointOnRoute)
-                        .target(userPosition)
-                        .zoom(SynTrendText.MAP_ZOOM_LEVEL)
+                                .target(userPosition)
+                                .zoom(SynTrendText.MAP_ZOOM_LEVEL)
 //                    .zoom((cameraMoveTimes < 5 && zoomLevel < NLPIText.MAP_ZOOM_LEVEL) ? NLPIText.MAP_ZOOM_LEVEL : zoomLevel)
-                        .bearing(mUserMarker.getRotation())
+                                .bearing(mUserMarker.getRotation())
 //                    .bearing((float) heading)
 //                    .tilt(20)
-                        .build();
-            } else {
-                cameraPosition = new CameraPosition.Builder()
-                        .target(userPosition)
-                        .zoom(SynTrendText.MAP_ZOOM_LEVEL)
-                        .build();
-            }
-
-            mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
-            cameraMoveTimes++;
-
-            if (startRecordFlag) {
-                String distanceBetween = Tools.getInstance().getDistanceStr(pointOnRoute.latitude, pointOnRoute.longitude, userPosition.latitude, userPosition.longitude);
-                recordData.add(new String[]{String.valueOf(pointOnRoute.latitude), String.valueOf(pointOnRoute.longitude),
-                        String.valueOf(userPosition.latitude), String.valueOf(userPosition.longitude),
-                        distanceBetween});
-            }
-
-            if (mCurrentRouteList != null) {
-                Log.e("OKOK", "mCurrentRouteList != null");
-                int lastOfArr = mCurrentRouteList.size() - 1;
-                double routeLat = Double.parseDouble(mCurrentRouteList.get(lastOfArr).getLatitude());
-                double routeLon = Double.parseDouble(mCurrentRouteList.get(lastOfArr).getLongitude());
-                float userDisToTarget = getDistance(pointOnRoute, routeLat, routeLon);
-                Log.e("OKOK", "userDisToTarget" + userDisToTarget);
-                if (userDisToTarget <= 5 && userDisToTarget > 0.5 &&
-                        mCurrentRouteList.get(lastOfArr).getFloorNumber()
-                                .equals(DataCacheManager.getInstance().getUserCurrentFloorLevel(SynTrendSDKActivity.this))) {
-                    if (getIntent().getExtras().containsKey(ARG_KEY_STORE_ROUTE_A)) {
-                        if (NavigationRoutePOIListA.size() != 0) {
-                            if (NavigationRoutePOIListA.get(0).getStoreID().equals(NavigationRoutePOIListAll.get(NavigationRoutePOIListAllPosition).getStoreID())) {
-                                NavigationRoutePOIListA.remove(0);
-                                route_custom = "";
-                                for (NavigationRoutePOI poi : NavigationRoutePOIListA) {
-                                    route_custom = route_custom + poi.getStoreID() + ",";
-                                }
-                                PreferencesTools.getInstance().saveProperty(this, PreferencesTools.KEY_STORE_ROUTE_A, route_custom);
-                            }
-                        }
-                        if (NavigationRoutePOIListB.size() != 0) {
-                            if (NavigationRoutePOIListB.get(0).getStoreID().equals(NavigationRoutePOIListAll.get(NavigationRoutePOIListAllPosition).getStoreID())) {
-                                NavigationRoutePOIListB.remove(0);
-                                route_recommend = "";
-                                for (NavigationRoutePOI poi : NavigationRoutePOIListB) {
-                                    route_recommend = route_recommend + poi.getStoreID() + ",";
-                                }
-                                PreferencesTools.getInstance().saveProperty(this, PreferencesTools.KEY_STORE_ROUTE_B, route_recommend);
-                            }
-                        }
-                        Log.e("OKOK", "route_custom" + route_custom);
-                        Log.e("OKOK", "route_recommend" + route_recommend);
-                    }
-
-                    if (getIntent().getExtras().containsKey(ARG_KEY_STORE_ROUTE_A) && NavigationRoutePOIListAllPosition >= NavigationRoutePOIListAll.size() - 1) {
-                        AlertDialog.Builder builder = new AlertDialog.Builder(this)
-                                .setTitle(R.string.dialog_title_hint)
-                                .setMessage(R.string.dialog_message_arrive_destination)
-                                .setPositiveButton(R.string.dialog_button_ok_text, new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialogInterface, int i) {
-                                        finish();
-                                    }
-                                });
-                        builder.create().show();
+                                .build();
                     } else {
-                        DialogTools.getInstance().showErrorMessage(this,
-                                R.string.dialog_title_hint,
-                                R.string.dialog_message_arrive_destination);
+                        cameraPosition = new CameraPosition.Builder()
+                                .target(userPosition)
+                                .zoom(SynTrendText.MAP_ZOOM_LEVEL)
+                                .build();
                     }
-                    NavigationRoutePOIListAllPosition++;
-                    MarkerListPosition++;
-                    leaveNavigation();
-                }
+
+                    mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+                    cameraMoveTimes++;
+
+//            if (startRecordFlag) {
+//                String distanceBetween = Tools.getInstance().getDistanceStr(pointOnRoute.latitude, pointOnRoute.longitude, userPosition.latitude, userPosition.longitude);
+//                recordData.add(new String[]{String.valueOf(pointOnRoute.latitude), String.valueOf(pointOnRoute.longitude),
+//                        String.valueOf(userPosition.latitude), String.valueOf(userPosition.longitude),
+//                        distanceBetween});
+//            }
+
+                    if (mCurrentRouteList != null) {
+                        Log.e("OKOK", "mCurrentRouteList != null");
+                        int lastOfArr = mCurrentRouteList.size() - 1;
+                        double routeLat = Double.parseDouble(mCurrentRouteList.get(lastOfArr).getLatitude());
+                        double routeLon = Double.parseDouble(mCurrentRouteList.get(lastOfArr).getLongitude());
+                        float userDisToTarget = getDistance(pointOnRoute, routeLat, routeLon);
+                        Log.e("OKOK", "userDisToTarget" + userDisToTarget);
+                        if (userDisToTarget <= 5 && userDisToTarget > 0.5 &&
+                                mCurrentRouteList.get(lastOfArr).getFloorNumber()
+                                        .equals(DataCacheManager.getInstance().getUserCurrentFloorLevel(SynTrendSDKActivity.this))) {
+                            if (getIntent().getExtras().containsKey(ARG_KEY_STORE_ROUTE_A)) {
+                                if (NavigationRoutePOIListA.size() != 0) {
+                                    if (NavigationRoutePOIListA.get(0).getStoreID().equals(NavigationRoutePOIListAll.get(NavigationRoutePOIListAllPosition).getStoreID())) {
+                                        NavigationRoutePOIListA.remove(0);
+                                        route_custom = "";
+                                        for (NavigationRoutePOI poi : NavigationRoutePOIListA) {
+                                            route_custom = route_custom + poi.getStoreID() + ",";
+                                        }
+                                        PreferencesTools.getInstance().saveProperty(SynTrendSDKActivity.this, PreferencesTools.KEY_STORE_ROUTE_A, route_custom);
+                                    }
+                                }
+                                if (NavigationRoutePOIListB.size() != 0) {
+                                    if (NavigationRoutePOIListB.get(0).getStoreID().equals(NavigationRoutePOIListAll.get(NavigationRoutePOIListAllPosition).getStoreID())) {
+                                        NavigationRoutePOIListB.remove(0);
+                                        route_recommend = "";
+                                        for (NavigationRoutePOI poi : NavigationRoutePOIListB) {
+                                            route_recommend = route_recommend + poi.getStoreID() + ",";
+                                        }
+                                        PreferencesTools.getInstance().saveProperty(SynTrendSDKActivity.this, PreferencesTools.KEY_STORE_ROUTE_B, route_recommend);
+                                    }
+                                }
+                                Log.e("OKOK", "route_custom" + route_custom);
+                                Log.e("OKOK", "route_recommend" + route_recommend);
+                            }
+
+                            if (getIntent().getExtras().containsKey(ARG_KEY_STORE_ROUTE_A) && NavigationRoutePOIListAllPosition >= NavigationRoutePOIListAll.size() - 1) {
+                                AlertDialog.Builder builder = new AlertDialog.Builder(SynTrendSDKActivity.this)
+                                        .setTitle(R.string.dialog_title_hint)
+                                        .setMessage(R.string.dialog_message_arrive_destination)
+                                        .setPositiveButton(R.string.dialog_button_ok_text, new DialogInterface.OnClickListener() {
+                                            @Override
+                                            public void onClick(DialogInterface dialogInterface, int i) {
+                                                finish();
+                                            }
+                                        });
+                                builder.create().show();
+                            } else {
+                                DialogTools.getInstance().showErrorMessage(SynTrendSDKActivity.this,
+                                        R.string.dialog_title_hint,
+                                        R.string.dialog_message_arrive_destination);
+                            }
+                            NavigationRoutePOIListAllPosition++;
+                            MarkerListPosition++;
+                            leaveNavigation();
+                        }
 //                if (getArguments().containsKey(ARG_KEY_BOOK_NAVIGATION_ROUTE) && userDisToTarget <= 3) {
 //                    String bookName = getArguments().getString(ARG_KEY_BOOK_NAME);
 //                    BookLocationInfo locationInfo = (BookLocationInfo) getArguments().getSerializable(ARG_KEY_BOOK_LOCATION_INFO);
@@ -2427,8 +2447,13 @@ public class SynTrendSDKActivity extends BaseActivity implements OnMapReadyCallb
 //                            navigationRoute.getBookshelfMsg()),
 //                            BookshelfFragment.TAG);
 //                }
-            }
+                    }
+    }
+});
+                }
+            }).start();
         }
+
     }
 
     private float getDistance(LatLng userlatlong, double routeLat, double routeLon) {
