@@ -954,7 +954,9 @@ public class SynTrendSDKActivity extends BaseActivity implements OnMapReadyCallb
         if (mIsIndoor && !userCurrentFloorPlanId.equals("919f0ac4-62e4-48ae-8217-dcb707bbcdc9")) {
             fetchFloorPlan(userCurrentFloorPlanId, false, DataCacheManager.getInstance().getFloorNumberByPlanId(this, userCurrentFloorPlanId));
         } else {
-            fetchFloorPlan(groundFloor.getFloorPlanId(), false, "1");
+            if (groundFloor != null) {
+                fetchFloorPlan(groundFloor.getFloorPlanId(), false, "1");
+            }
         }
     }
 
@@ -2723,13 +2725,12 @@ public class SynTrendSDKActivity extends BaseActivity implements OnMapReadyCallb
     }
 
     private void getRecommendRoute(final String routeA, final String routeB) {
+        Log.e("OKOK", "routeA" + routeA);
+        Log.e("OKOK", "routeB" + routeB);
         if (!mIsMapInited) {
             mEventBus.post(new OmniEvent(OmniEvent.TYPE_REQUEST_LAST_LOCATION, ""));
 
         } else {
-
-            mEventBus.post(new OmniEvent(OmniEvent.TYPE_REQUEST_LAST_LOCATION, ""));
-
             final String floorPlanId = DataCacheManager.getInstance().getUserCurrentFloorPlanId();
             String buildingId = DataCacheManager.getInstance().getBuildingIdByFloorPlanId(this, floorPlanId);
             String floorLevel = DataCacheManager.getInstance().getUserCurrentFloorLevel(this);
