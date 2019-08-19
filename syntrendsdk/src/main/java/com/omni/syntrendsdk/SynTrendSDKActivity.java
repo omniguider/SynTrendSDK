@@ -133,7 +133,7 @@ import static com.omni.syntrendsdk.SynTrendSDKActivity.POI_CATE.THEATER_CATE;
 
 public class SynTrendSDKActivity extends BaseActivity implements OnMapReadyCallback,
         GoogleMap.OnInfoWindowCloseListener,
-        BeaconConsumer,
+//        BeaconConsumer,
         BluetoothAdapter.LeScanCallback {
 
     public static final LatLng START_LOCATION = new LatLng(25.045130666062, 121.53120953099);
@@ -2833,45 +2833,45 @@ public class SynTrendSDKActivity extends BaseActivity implements OnMapReadyCallb
         }
     }
 
-    @Override
-    public void onBeaconServiceConnect() {
-        mBeaconManager.addMonitorNotifier(new MonitorNotifier() {
-            @Override
-            public void didEnterRegion(Region region) {
-                try {
-                    mBeaconManager.startRangingBeaconsInRegion(new Region("myRangingUniqueId", null, null, null));
-                } catch (RemoteException e) {
-                    Log.e("@W@", "RemoteException #999 ");
-                }
-            }
-
-            @Override
-            public void didExitRegion(Region region) {
-            }
-
-            @Override
-            public void didDetermineStateForRegion(int state, Region region) {
-                mBeaconManager.addRangeNotifier(new RangeNotifier() {
-                    @Override
-                    public void didRangeBeaconsInRegion(final Collection<Beacon> collection, final Region region) {
-                        SynTrendSDKActivity.this.runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                receiveBeacon(collection);
-                            }
-                        });
-                    }
-                });
-
-            }
-        });
-
-        try {
-            mBeaconManager.startMonitoringBeaconsInRegion(new Region("myRangingUniqueId", null, null, null));
-        } catch (RemoteException e) {
-            e.printStackTrace();
-        }
-    }
+//    @Override
+//    public void onBeaconServiceConnect() {
+//        mBeaconManager.addMonitorNotifier(new MonitorNotifier() {
+//            @Override
+//            public void didEnterRegion(Region region) {
+//                try {
+//                    mBeaconManager.startRangingBeaconsInRegion(new Region("myRangingUniqueId", null, null, null));
+//                } catch (RemoteException e) {
+//                    Log.e("@W@", "RemoteException #999 ");
+//                }
+//            }
+//
+//            @Override
+//            public void didExitRegion(Region region) {
+//            }
+//
+//            @Override
+//            public void didDetermineStateForRegion(int state, Region region) {
+//                mBeaconManager.addRangeNotifier(new RangeNotifier() {
+//                    @Override
+//                    public void didRangeBeaconsInRegion(final Collection<Beacon> collection, final Region region) {
+//                        SynTrendSDKActivity.this.runOnUiThread(new Runnable() {
+//                            @Override
+//                            public void run() {
+//                                receiveBeacon(collection);
+//                            }
+//                        });
+//                    }
+//                });
+//
+//            }
+//        });
+//
+//        try {
+//            mBeaconManager.startMonitoringBeaconsInRegion(new Region("myRangingUniqueId", null, null, null));
+//        } catch (RemoteException e) {
+//            e.printStackTrace();
+//        }
+//    }
 
     private void receiveBeacon(final Collection<Beacon> collection) {
 
