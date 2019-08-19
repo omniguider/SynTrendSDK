@@ -1268,7 +1268,7 @@ public class SynTrendSDKActivity extends BaseActivity implements OnMapReadyCallb
                     public void run() {
                         getNavigationData();
                     }
-                }, 9000);
+                }, 12000);
             }
 
         } else {
