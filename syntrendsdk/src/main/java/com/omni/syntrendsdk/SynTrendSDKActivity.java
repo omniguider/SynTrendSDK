@@ -373,6 +373,21 @@ public class SynTrendSDKActivity extends BaseActivity implements OnMapReadyCallb
         initView();
     }
 
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+
+        guide_category = getIntent().getStringExtra(ARG_KEY_GUIDE_CATEGORY);
+        facility_type = getIntent().getStringExtra(ARG_KEY_FACILITY_TYPE);
+        facility_title = getIntent().getStringExtra(ARG_KEY_FACILITY_TITLE);
+        route_custom = getIntent().getStringExtra(ARG_KEY_STORE_ROUTE_A);
+        route_recommend = getIntent().getStringExtra(ARG_KEY_STORE_ROUTE_B);
+        autoHeading = getIntent().getBooleanExtra(ARG_KEY_AUTO_HEADING, true);
+        naviDirect = getIntent().getBooleanExtra(ARG_KEY_NAVIGATE_DIRECT, false);
+
+    }
+
     private void checkBluetoothOn() {
         BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         if (bluetoothAdapter == null) {
