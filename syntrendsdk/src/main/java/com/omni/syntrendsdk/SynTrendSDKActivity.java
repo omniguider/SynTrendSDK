@@ -912,7 +912,7 @@ public class SynTrendSDKActivity extends BaseActivity implements OnMapReadyCallb
 
         setNavigationMode(NaviMode.USER_IN_NAVIGATION);
 
-        if (mEndPOI == null) {
+        if (mEndPOI == null && mCurrentSelectedPOI != null) {
             mEndPOI = mCurrentSelectedPOI;
         }
 
@@ -2763,6 +2763,9 @@ public class SynTrendSDKActivity extends BaseActivity implements OnMapReadyCallb
                             DialogTools.getInstance().dismissProgress(SynTrendSDKActivity.this);
                             if (routePOIs.length != 0) {
 //                                startNavigation(Arrays.asList(routePOIs));
+                                if (getIntent().getExtras().containsKey(ARG_KEY_STORE_ROUTE_A)) {
+                                    EndPOIId = routePOIs[0].getID();
+                                }
                                 routePOIList = new ArrayList<>();
                                 routePOIList = Arrays.asList(routePOIs);
                                 initRoutePOIList(routePOIList);
