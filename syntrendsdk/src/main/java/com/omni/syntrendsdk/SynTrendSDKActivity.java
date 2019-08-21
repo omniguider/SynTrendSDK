@@ -329,7 +329,7 @@ public class SynTrendSDKActivity extends BaseActivity implements OnMapReadyCallb
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        Log.e("OKOK", "onCreate");
         SensorManager sm = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         List<Sensor> allSensors = sm.getSensorList(Sensor.TYPE_ALL);
         for (Sensor s : allSensors) {
@@ -366,6 +366,10 @@ public class SynTrendSDKActivity extends BaseActivity implements OnMapReadyCallb
         autoHeading = getIntent().getBooleanExtra(ARG_KEY_AUTO_HEADING, true);
         naviDirect = getIntent().getBooleanExtra(ARG_KEY_NAVIGATE_DIRECT, false);
 
+        Log.e("OKOK", "route_custom" + route_custom);
+        Log.e("OKOK", "route_recommend" + route_recommend);
+        Log.e("OKOK", "naviDirect" + naviDirect);
+
         DataCacheManager.getInstance().initAllBuildingsData(this);
         checkLocationService();
         checkBluetoothOn();
@@ -377,6 +381,7 @@ public class SynTrendSDKActivity extends BaseActivity implements OnMapReadyCallb
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
         setIntent(intent);
+        Log.e("OKOK", "onNewIntent");
 
         guide_category = getIntent().getStringExtra(ARG_KEY_GUIDE_CATEGORY);
         facility_type = getIntent().getStringExtra(ARG_KEY_FACILITY_TYPE);
@@ -385,6 +390,10 @@ public class SynTrendSDKActivity extends BaseActivity implements OnMapReadyCallb
         route_recommend = getIntent().getStringExtra(ARG_KEY_STORE_ROUTE_B);
         autoHeading = getIntent().getBooleanExtra(ARG_KEY_AUTO_HEADING, true);
         naviDirect = getIntent().getBooleanExtra(ARG_KEY_NAVIGATE_DIRECT, false);
+
+        Log.e("OKOK", "route_custom" + route_custom);
+        Log.e("OKOK", "route_recommend" + route_recommend);
+        Log.e("OKOK", "naviDirect" + naviDirect);
 
     }
 

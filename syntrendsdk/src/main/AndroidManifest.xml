@@ -48,7 +48,7 @@
         <activity
             android:name=".SynTrendSDKActivity"
             android:keepScreenOn="true"
-            android:launchMode="singleTop"
+            android:launchMode="standard"
             android:screenOrientation="portrait"
             android:theme="@style/STSDKTheme">
             <intent-filter>
