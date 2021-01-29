@@ -15,7 +15,7 @@
         android:gravity="center"
         android:text="@string/drawer_content_pager_error_msg_no_data" />
 
-    <android.support.v7.widget.Toolbar
+    <androidx.appcompat.widget.Toolbar
         android:id="@+id/hint_action_bar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
@@ -47,7 +47,7 @@
             android:textColor="@android:color/white"
             android:textStyle="bold" />
 
-    </android.support.v7.widget.Toolbar>
+    </androidx.appcompat.widget.Toolbar>
 
     <EditText
         android:id="@+id/map_content_view_tv_search"
@@ -72,7 +72,7 @@
         android:layout_marginEnd="4dp"
         android:src="@mipmap/button_search_gray" />
 
-    <android.support.v7.widget.RecyclerView
+    <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/drawer_exhibits_fragment_view_rv"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

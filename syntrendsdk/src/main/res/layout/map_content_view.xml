@@ -5,13 +5,13 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <android.support.design.widget.AppBarLayout
+    <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/map_content_view_abl"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@android:color/white">
 
-        <android.support.v7.widget.Toolbar
+        <androidx.appcompat.widget.Toolbar
             android:id="@+id/map_content_view_toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
@@ -80,7 +80,7 @@
                 android:textSize="@dimen/text_size_action_bar"
                 android:textStyle="bold" />
 
-        </android.support.v7.widget.Toolbar>
+        </androidx.appcompat.widget.Toolbar>
 
         <LinearLayout
             android:id="@+id/map_content_view_category_btn"
@@ -142,7 +142,7 @@
                 android:textSize="@dimen/text_size_big" />
         </LinearLayout>
 
-    </android.support.design.widget.AppBarLayout>
+    </com.google.android.material.appbar.AppBarLayout>
 
     <fragment
         android:id="@+id/map_content_view_map"
@@ -499,4 +499,14 @@
 
     </LinearLayout>
 
+    <TextView
+        android:id="@+id/map_content_view_battery_tv"
+        android:layout_width="wrap_content"
+        android:visibility="gone"
+        android:padding="@dimen/default_padding"
+        android:layout_alignParentBottom="true"
+        android:background="@android:color/white"
+        android:textSize="16sp"
+        android:layout_height="wrap_content"
+        android:text="Beacon電量"/>
 </RelativeLayout>

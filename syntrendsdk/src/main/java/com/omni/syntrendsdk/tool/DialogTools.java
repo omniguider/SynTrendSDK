@@ -6,15 +6,13 @@ import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.support.annotation.Nullable;
-import android.support.annotation.StringRes;
-import android.support.v4.app.FragmentManager;
+import androidx.annotation.Nullable;
+import androidx.annotation.StringRes;
+import androidx.fragment.app.FragmentManager;
 import android.text.TextUtils;
 import android.util.Log;
-import android.view.View;
 
 import com.omni.syntrendsdk.R;
-import com.omni.syntrendsdk.SynTrendSDKActivity;
 
 import java.lang.ref.WeakReference;
 

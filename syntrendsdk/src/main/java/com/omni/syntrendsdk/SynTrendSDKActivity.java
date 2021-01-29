@@ -5,14 +5,12 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.app.Service;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -25,16 +23,14 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
-import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManager;
-import android.os.RemoteException;
 import android.provider.Settings;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.design.widget.BottomSheetBehavior;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Gravity;
@@ -50,7 +46,6 @@ import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -77,16 +72,11 @@ import com.google.android.gms.maps.model.UrlTileProvider;
 import com.google.maps.android.SphericalUtil;
 import com.google.maps.android.clustering.Cluster;
 import com.google.maps.android.clustering.ClusterManager;
-import com.indooratlas.android.sdk.IARegion;
-import com.indooratlas.android.sdk.resources.IAFloorPlan;
 //import com.indooratlas.android.sdk.resources.IAResourceManager;
-import com.indooratlas.android.sdk.resources.IAResult;
-import com.indooratlas.android.sdk.resources.IAResultCallback;
-import com.indooratlas.android.sdk.resources.IATask;
+//import com.indooratlas.android.sdk.resources.IAResultCallback;
+//import com.indooratlas.android.sdk.resources.IATask;
 import com.omni.syntrendsdk.manager.BeaconDataManager;
 import com.omni.syntrendsdk.manager.DataCacheManager;
-import com.omni.syntrendsdk.module.BeaconInfo;
-import com.omni.syntrendsdk.module.BeaconPushContent;
 import com.omni.syntrendsdk.module.BuildingFloor;
 import com.omni.syntrendsdk.module.NavigationRoutePOI;
 import com.omni.syntrendsdk.module.NavigationType;
@@ -107,11 +97,7 @@ import com.omni.syntrendsdk.view.CircleNetworkImageView;
 import com.omni.syntrendsdk.view.OmniClusterRender;
 
 import org.altbeacon.beacon.Beacon;
-import org.altbeacon.beacon.BeaconConsumer;
 import org.altbeacon.beacon.BeaconManager;
-import org.altbeacon.beacon.MonitorNotifier;
-import org.altbeacon.beacon.RangeNotifier;
-import org.altbeacon.beacon.Region;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
@@ -218,7 +204,7 @@ public class SynTrendSDKActivity extends BaseActivity implements OnMapReadyCallb
     private GoogleMap mMap;
     private ClusterManager<OmniClusterItem> mClusterManager;
     private Location mLastLocation;
-    private IATask<IAFloorPlan> mPendingAsyncResult;
+    //    private IATask<IAFloorPlan> mPendingAsyncResult;
     //    private IAResourceManager mIAResourceManager;
     private TextView mFloorLevelTV;
     private Marker mUserMarker;
@@ -2507,9 +2493,9 @@ public class SynTrendSDKActivity extends BaseActivity implements OnMapReadyCallb
     }
 
     private void cancelPendingNetworkCalls() {
-        if (mPendingAsyncResult != null && !mPendingAsyncResult.isCancelled()) {
-            mPendingAsyncResult.cancel();
-        }
+//        if (mPendingAsyncResult != null && !mPendingAsyncResult.isCancelled()) {
+//            mPendingAsyncResult.cancel();
+//        }
     }
 
     private boolean checkTileExists(int x, int y, int zoom) {
@@ -2838,6 +2824,20 @@ public class SynTrendSDKActivity extends BaseActivity implements OnMapReadyCallb
                     "\naddress : " + device.getAddress() +
                     "\ndevice name : " + device.getName() +
                     "\nrssi : " + rssi);
+
+            final String beconBattery = "BatteryPower:" + powerData.batteryPower +
+                    "\nBatteryUuid : " + powerData.BatteryUuid +
+                    "\naddress : " + device.getAddress() +
+                    "\ndevice name : " + device.getName() +
+                    "\nrssi : " + rssi;
+
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    ((TextView) findViewById(R.id.map_content_view_battery_tv)).setText(beconBattery);
+                }
+            });
+
             if (!device.getAddress().equals(mLastSendBatteryMac)) {
 
                 SynTrendApi.getInstance().setBeaconBatteryLevel(SynTrendSDKActivity.this,

@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <android.support.design.widget.CoordinatorLayout
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
@@ -27,13 +27,13 @@
             android:layout_height="wrap_content"
             app:behavior_hideable="true"
             app:behavior_peekHeight="0dp"
-            app:layout_behavior="android.support.design.widget.BottomSheetBehavior">
+            app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
 
             <include
                 android:id="@+id/ntsdk_activity_main_poi_info"
                 layout="@layout/item_poi_info" />
         </FrameLayout>
 
-    </android.support.design.widget.CoordinatorLayout>
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
 </FrameLayout>

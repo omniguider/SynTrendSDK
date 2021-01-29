@@ -1,7 +1,7 @@
 package com.omni.syntrendsdk.manager;
 
 import android.app.Activity;
-import android.support.v4.util.ArrayMap;
+import androidx.collection.ArrayMap;
 import android.text.TextUtils;
 
 import com.google.gson.Gson;

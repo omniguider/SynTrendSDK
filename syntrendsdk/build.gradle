@@ -2,18 +2,18 @@ apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 
 android {
-    compileSdkVersion 28
+    compileSdkVersion 29
 
     def indoorAtlasApiKey = project.properties['indoorAtlasApiKey'] ?: "api-key-not-set";
     def indoorAtlasApiSecret = project.properties['indoorAtlasApiSecret'] ?: "api-secrect-not-set";
 
     defaultConfig {
         minSdkVersion 21
-        targetSdkVersion 27
+        targetSdkVersion 29
         versionCode 1
         versionName "1.0"
 
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
 
         resValue "string", "indoor_atlas_api_key", indoorAtlasApiKey
         resValue "string", "indoor_atlas_api_secret", indoorAtlasApiSecret
@@ -36,11 +36,11 @@ android {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-    implementation 'com.android.support:appcompat-v7:28.0.0'
-    implementation 'com.android.support:design:28.0.0'
+    implementation 'androidx.appcompat:appcompat:1.0.0'
+    implementation 'com.google.android.material:material:1.0.0'
     testImplementation 'junit:junit:4.12'
-    androidTestImplementation 'com.android.support.test:runner:1.0.2'
-    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.1'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.0'
     implementation 'com.google.android.gms:play-services-maps:16.0.0'
     implementation 'com.google.android.gms:play-services-vision:17.0.2'
     implementation 'com.google.android.gms:play-services-places:16.0.0'
@@ -50,10 +50,10 @@ dependencies {
     implementation 'com.squareup.retrofit2:retrofit:2.3.0'
     implementation 'com.squareup.retrofit2:converter-gson:2.3.0'
     implementation 'com.google.code.gson:gson:2.8.0'
-    implementation 'com.android.support.constraint:constraint-layout:1.1.3'
+    implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
     implementation 'org.greenrobot:eventbus:3.0.0'
     implementation 'org.altbeacon:android-beacon-library:2+'
-    implementation 'com.indooratlas.android:indooratlas-android-sdk:3.0.0-beta-1021'
+    implementation 'com.indooratlas.android:indooratlas-android-sdk:3.2.1'
 //    implementation files('libs/indooratlas-android-sdk-2.5.3.jar')
     implementation files('libs/libusbeaconapp.jar')
     implementation files('libs/libomniguider.jar')

@@ -5,8 +5,8 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.provider.Settings;
-import android.support.annotation.DrawableRes;
-import android.text.TextUtils;
+import androidx.annotation.DrawableRes;
+
 import android.util.Log;
 
 import com.android.volley.RequestQueue;
@@ -25,7 +25,6 @@ import java.security.NoSuchAlgorithmException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import okhttp3.CertificatePinner;
 import okhttp3.OkHttpClient;
 import retrofit2.Call;
 import retrofit2.Callback;

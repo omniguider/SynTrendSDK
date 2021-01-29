@@ -4,9 +4,9 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.support.v4.content.ContextCompat
-import android.support.v7.widget.*
-import android.support.v7.widget.Toolbar
+import androidx.core.content.ContextCompat
+import androidx.appcompat.widget.*
+import androidx.appcompat.widget.Toolbar
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -14,6 +14,10 @@ import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.*
+import androidx.recyclerview.widget.DefaultItemAnimator
+import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.omni.syntrendsdk.manager.DataCacheManager
 import com.omni.syntrendsdk.module.BuildingFloor
 import com.omni.syntrendsdk.module.POI
@@ -68,7 +72,7 @@ class PoiSearchActivity : Activity() {
             val searchText = searchEdt.text.toString()
             mSearchText = searchText
             val imm = this.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-            imm.hideSoftInputFromWindow(this.currentFocus.windowToken, 0)
+            imm.hideSoftInputFromWindow(this.currentFocus?.windowToken, 0)
             doSearchPOI(mSearchText)
         }
         searchEdt.setOnEditorActionListener(TextView.OnEditorActionListener { v, actionId, event ->
@@ -76,7 +80,7 @@ class PoiSearchActivity : Activity() {
                 val searchText = searchEdt.text.toString()
                 mSearchText = searchText
                 val imm = this.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-                imm.hideSoftInputFromWindow(this.currentFocus.windowToken, 0)
+                imm.hideSoftInputFromWindow(this.currentFocus?.windowToken, 0)
                 doSearchPOI(mSearchText)
                 return@OnEditorActionListener true
             }

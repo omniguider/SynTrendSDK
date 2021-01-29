@@ -16,7 +16,7 @@
             android:id="@+id/poi_info_view_header"
             layout="@layout/item_poi_header" />
 
-        <android.support.v4.widget.NestedScrollView
+        <androidx.core.widget.NestedScrollView
             android:layout_width="match_parent"
             android:layout_height="300dp"
             android:layout_below="@id/poi_info_view_header">
@@ -52,7 +52,7 @@
 
             </LinearLayout>
 
-        </android.support.v4.widget.NestedScrollView>
+        </androidx.core.widget.NestedScrollView>
     </RelativeLayout>
 
     <FrameLayout
